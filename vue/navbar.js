@@ -12,7 +12,7 @@ function Navbar() {
           </NavLink>
         </li>
         <li className="navbar-item">
-          <NavLink to="/news" className="navbar-link" activeClassName="active">
+          <NavLink to="/global" className="navbar-link" activeClassName="active">
             Global
           </NavLink>
         </li>
