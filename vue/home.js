@@ -1,11 +1,11 @@
 import React from 'react';
+import { View, Text } from 'react-native';
 
 function Home() {
   return (
-      <div>
-        <title>Home</title>
-        <h1>Home Page</h1>
-    </div>
+    <View>
+      <Text>Home Page</Text>
+    </View>
   );
 }
 

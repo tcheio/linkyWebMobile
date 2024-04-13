@@ -1,10 +1,11 @@
 import React from 'react';
+import { View, Text } from 'react-native';
 
 function Global() {
   return (
-    <div>
-      <h1>News Page</h1>
-    </div>
+      <View>
+      <Text>Global Page</Text>
+    </View>
   );
 }
 
