@@ -17,12 +17,11 @@ function Navbar() {
 
 const styles = StyleSheet.create({
   navbar: {
-    position: 'fixed',
+    position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#b700ff',
-    color: '#fff',
+    backgroundColor: '#34495e', // Couleur de fond
     flexDirection: 'row',
     justifyContent: 'center',
     padding: 10,
@@ -31,7 +30,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   navbarLink: {
-    color: '#fff',
+    color: '#fff', // Couleur du texte
     textDecorationLine: 'none',
   },
   active: {
