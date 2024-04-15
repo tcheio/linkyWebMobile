@@ -4,21 +4,25 @@ import axios from 'axios';
 
 function Home() {
   const [latestConso, setLatestConso] = useState(null);
+  const [difference, setDifference] = useState(null); // Ajout de l'état pour stocker la différence
 
   useEffect(() => {
-    const fetchLatestConso = async () => {
+    const fetchData = async () => {
       try {
-        const clientId = 1; // L'ID du client pour lequel tu veux récupérer la dernière consommation
-        const response = await axios.get(`http://localhost:3000/conso/latest/${clientId}`);
-        setLatestConso(response.data[0]); // On récupère la première (et unique) entrée dans le tableau de résultats
-      } catch (error) {
-        console.error('Erreur lors de la récupération de la dernière consommation :', error);
+        const clientId = 1; // L'ID du client pour lequel tu veux récupérer les données
+        // Appel à l'API pour récupérer la consommation de la veille
+        const responseLatest = await axios.get(`http://localhost:3000/conso/latest/${clientId}`);
+        setLatestConso(responseLatest.data[0]);
 
-        console.log(response.data)
+        // Appel à l'API pour récupérer la différence entre les deux dernières entrées
+        const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${clientId}`);
+        setDifference(responseDifference.data.difference);
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données :', error);
       }
     };
 
-    fetchLatestConso();
+    fetchData();
   }, []);
 
   return (
@@ -27,6 +31,11 @@ function Home() {
       {latestConso && (
         <View style={styles.consoContainer}>
           <Text style={styles.kw}>Kw: {latestConso.kw}</Text>
+        </View>
+      )}
+      {difference !== null && ( // Vérifie si la différence a été récupérée
+        <View style={styles.differenceContainer}>
+          <Text style={styles.differenceText}>Différence par rapport à il y a deux jours: {difference}</Text>
         </View>
       )}
     </View>
@@ -51,6 +60,15 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: 10,
     borderRadius: 5,
+    marginBottom: 20,
+  },
+  differenceContainer: {
+    borderWidth: 1,
+    padding: 10,
+    borderRadius: 5,
+  },
+  differenceText: {
+    fontSize: 18,
   },
 });
 
