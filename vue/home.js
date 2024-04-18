@@ -4,17 +4,14 @@ import axios from 'axios';
 
 function Home() {
   const [latestConso, setLatestConso] = useState(null);
-  const [difference, setDifference] = useState(null); // Ajout de l'état pour stocker la différence
+  const [difference, setDifference] = useState(null); 
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const clientId = 1; // L'ID du client pour lequel tu veux récupérer les données
-        // Appel à l'API pour récupérer la consommation de la veille
-        const responseLatest = await axios.get(`http://localhost:3000/conso/latest/${clientId}`);
+        const clientId = 1; // PROVISOIRE (en attendant la gestion de l'authentification)
+        const responseLatest = await axios.get(`http://localhost:3000/conso/last/${clientId}`);
         setLatestConso(responseLatest.data[0]);
-
-        // Appel à l'API pour récupérer la différence entre les deux dernières entrées
         const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${clientId}`);
         setDifference(responseDifference.data.difference);
       } catch (error) {
@@ -33,7 +30,7 @@ function Home() {
           <Text style={styles.kw}>Kw: {latestConso.kw}</Text>
         </View>
       )}
-      {difference !== null && ( // Vérifie si la différence a été récupérée
+      {difference !== null && ( 
         <View style={styles.differenceContainer}>
           <Text style={styles.differenceText}>Différence par rapport à il y a deux jours: {difference}</Text>
         </View>
