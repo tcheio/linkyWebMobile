@@ -24,6 +24,7 @@ function Home() {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.text}>Bienvenue sur votre espace personnel</Text>
       <Text style={styles.text}>Consommation de la veille:</Text>
       {latestConso && (
         <View style={styles.consoContainer}>

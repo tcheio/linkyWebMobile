@@ -1,3 +1,5 @@
+//RELICA ancienne version du projet
+
 const mysql = require('mysql');
 
 const connection = mysql.createConnection({
@@ -7,7 +9,6 @@ const connection = mysql.createConnection({
   database: 'consoelec' 
 });
 
-// Connexion à la base de données
 connection.connect((err) => {
   if (err) {
     console.error('Erreur de connexion :', err);
@@ -15,15 +16,15 @@ connection.connect((err) => {
   }
   console.log('Connecté à la base de données');
   
-  // Exemple de requête
+
   connection.query('SELECT * FROM table', (error, results, fields) => {
     if (error) {
-      console.error('Erreur lors de l\'exécution de la requête :', error);
+      console.error('Erreur lors de exécution de la requête :', error);
       return;
     }
     console.log('Résultats de la requête :', results);
   });
 });
 
-// Fermeture de la connexion à la base de données après l'exécution des requêtes
+
 connection.end();

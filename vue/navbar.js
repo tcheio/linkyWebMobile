@@ -10,7 +10,6 @@ function Navbar() {
       <TouchableOpacity style={styles.navbarItem}>
         <Text style={styles.navbarLink}>Analyse</Text>
       </TouchableOpacity>
-      {/* Ajoutez d'autres liens au besoin */}
     </View>
   );
 }
@@ -21,7 +20,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#34495e', // Couleur de fond
+    backgroundColor: '#34495e', 
     flexDirection: 'row',
     justifyContent: 'center',
     padding: 10,
@@ -30,7 +29,7 @@ const styles = StyleSheet.create({
     marginHorizontal: 10,
   },
   navbarLink: {
-    color: '#fff', // Couleur du texte
+    color: '#fff', 
     textDecorationLine: 'none',
   },
   active: {
