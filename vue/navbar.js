@@ -10,6 +10,9 @@ function Navbar() {
       <TouchableOpacity style={styles.navbarItem}>
         <Text style={styles.navbarLink}>Analyse</Text>
       </TouchableOpacity>
+      <TouchableOpacity style={styles.navbarItem}>
+        <Text style={styles.navbarLink}>Compte</Text>
+      </TouchableOpacity>
     </View>
   );
 }

@@ -4,25 +4,10 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createStackNavigator } from '@react-navigation/stack';
 import HomeScreen from './vue/home';
 import GlobalScreen from './vue/global';
+import CompteScreen from './vue/compte';
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
-
-/*function HomeStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="Home" component={HomeScreen} />
-    </Stack.Navigator>
-  );
-}
-
-function GlobalStack() {
-  return (
-    <Stack.Navigator>
-      <Stack.Screen name="Global" component={GlobalScreen} />
-    </Stack.Navigator>
-  );
-}*/
 
 function App() {
   return (
@@ -30,10 +15,10 @@ function App() {
       <Tab.Navigator>
         <Tab.Screen name="Accueil" component={HomeScreen} />
         <Tab.Screen name="Analyse" component={GlobalScreen} />
+        <Tab.Screen name="Compte" component={CompteScreen} />
       </Tab.Navigator>
     </NavigationContainer>
   );
 }
-
 
 export default App;
