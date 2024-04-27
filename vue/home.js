@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import axios from 'axios';
 
+
 function Home() {
   const [latestConso, setLatestConso] = useState(null);
   const [difference, setDifference] = useState(null); 
