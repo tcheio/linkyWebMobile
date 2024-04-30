@@ -1,35 +1,55 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import axios from 'axios';
 
-// État global pour déterminer si l'utilisateur est connecté ou non
-let isUserLoggedIn = null;
+let isUserLoggedIn = false;
 
 function CompteScreen() {
   const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  // Fonction pour gérer la soumission du formulaire de connexion
-  const handleSubmit = () => {
-    // Ici, vous pouvez implémenter la logique de connexion avec votre backend
-    // Par exemple, vérifier les identifiants dans une base de données
+  // Connexion
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/connexion', {
+        username: username,
+        password: password,
+      });
 
-    // Pour cet exemple, nous allons simplement simuler une connexion réussie si les champs ne sont pas vides
-    if (username !== '' && password !== '') {
-      setIsLoggedIn(true);
-      isUserLoggedIn = true; // Met à jour l'état global
+      if (response.status === 200) {
+        setIsLoggedIn(true);
+        isUserLoggedIn = true;
+        Alert.alert('Connexion réussie');
+      } else {
+        Alert.alert('Erreur', response.data.error);
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
+      console.error('Erreur lors de la connexion :', error);
     }
   };
 
-  // Fonction pour gérer la déconnexion de l'utilisateur
-  const handleLogout = () => {
-    setIsLoggedIn(false);
-    isUserLoggedIn = false; // Met à jour l'état global
-  };
+  // Déconnexion
+ const handleLogout = async () => {
+  try {
+    const response = await axios.post('http://localhost:3000/deconnexion');
+    if (response.status === 200) {
+      setIsLoggedIn(false);
+      isUserLoggedIn = false;
+      Alert.alert('Déconnexion réussie');
+    } else {
+      Alert.alert('Erreur', response.data.error);
+    }
+  } catch (error) {
+    Alert.alert('Erreur', 'Une erreur est survenue lors de la déconnexion');
+    console.error('Erreur lors de la déconnexion :', error);
+  }
+};
 
   return (
     <View style={styles.container}>
-      {isLoggedIn === null ? (
+      {isLoggedIn === false ? (
         <View>
           <Text>Veuillez vous connecter</Text>
           <TextInput
