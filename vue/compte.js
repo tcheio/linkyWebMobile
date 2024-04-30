@@ -26,7 +26,7 @@ function CompteScreen() {
       }
     } catch (error) {
       Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
-      console.error('Erreur lors de la connexion :', error);
+      console.error('Erreur lors ade la connexion :', error);
     }
   };
 
