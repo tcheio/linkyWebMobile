@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import axios from 'axios';
 
-let isUserLoggedIn = false;
 
 function CompteScreen() {
-  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 

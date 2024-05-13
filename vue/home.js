@@ -5,39 +5,20 @@ import axios from 'axios';
 let isUserLoggedIn = false;
 
 function Home() {
+  const [clientid, setClient_id] = useState(null); 
   const [latestConso, setLatestConso] = useState(null);
   const [difference, setDifference] = useState(null); 
   const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  // Connexion
-  const handleSubmit = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/connexion', {
-        username: username,
-        password: password,
-      });
-
-      if (response.status === 200) {
-        setIsLoggedIn(true);
-        isUserLoggedIn = true;
-        Alert.alert('Connexion réussie');
-      } else {
-        Alert.alert('Erreur', response.data.error);
-      }
-    } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
-      console.error('Erreur lors de la connexion :', error);
-    }
-  };
-
+  
   // Déconnexion
- const handleLogout = async () => {
-  try {
-    const response = await axios.post('http://localhost:3000/deconnexion');
-    if (response.status === 200) {
-      setIsLoggedIn(false);
+  const handleLogout = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/deconnexion');
+      if (response.status === 200) {
+        setIsLoggedIn(false);
       isUserLoggedIn = false;
       Alert.alert('Déconnexion réussie');
     } else {
@@ -48,24 +29,57 @@ function Home() {
     console.error('Erreur lors de la déconnexion :', error);
   }
 };
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const clientId = 1; // PROVISOIRE (en attendant la gestion de l'authentification)
-        const responseLatest = await axios.get(`http://localhost:3000/conso/last/${clientId}`);
-        setLatestConso(responseLatest.data[0]);
-        const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${clientId}`);
-        setDifference(responseDifference.data.difference);
-      } catch (error) {
-        console.error('Erreur lors de la récupération des données :', error);
+
+// Connexion
+const handleSubmit = async () => {
+  try {
+    const response = await axios.post('http://localhost:3000/connexion', {
+      username: username,
+      password: password,
+    });
+
+    if (response.status === 200) {
+      setIsLoggedIn(true);
+      isUserLoggedIn = true;
+      
+      Alert.alert('Connexion réussie');
+    } else {
+      Alert.alert('Erreur', response.data.error);
+    }
+  } catch (error) {
+    Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
+    console.error('Erreur lors de la connexion :', error);
+  }
+};
+
+useEffect(() => {
+  const fetchData = async () => {
+    try {
+      if (isLoggedIn && username && password) {
+        const responseInfo = await axios.get(`http://localhost:3000/info/${username}`);
+          const clientId = responseInfo.data.id;
+          setClient_id(clientId);
+          
+          const responseLatest = await axios.get(`http://localhost:3000/conso/last/${clientId}`);
+          setLatestConso(responseLatest.data[0]);
+          
+          const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${clientId}`);
+          setDifference(responseDifference.data.difference);
       }
-    };
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données :', error);
+    }
+  };
+  
+  fetchData();
+}, [isLoggedIn, username, password]);
 
-    fetchData();
-  }, []);
 
-  return (
-    <View style={styles.container}>
+
+
+
+return (
+  <View style={styles.container}>
       {isLoggedIn === false ? (
         <View>
           <Text>Veuillez vous connecter</Text>
@@ -86,7 +100,7 @@ function Home() {
         </View>
       ) : (
         <View>
-          <Text style={styles.text}>Bienvenue sur votre espace personnel</Text>
+          <Text style={styles.text}>Bienvenue sur votre espace personnel{username} {clientid}</Text>
       <Text style={styles.text}>Consommation de la veille:</Text>
       {latestConso && (
         <View style={styles.consoContainer}>
