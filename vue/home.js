@@ -100,7 +100,7 @@ return (
         </View>
       ) : (
         <View>
-          <Text style={styles.text}>Bienvenue sur votre espace personnel{username} {clientid}</Text>
+          <Text style={styles.text}>Bienvenue sur votre espace personnel{'\n'}{username}</Text>
       <Text style={styles.text}>Consommation de la veille:</Text>
       {latestConso && (
         <View style={styles.consoContainer}>
