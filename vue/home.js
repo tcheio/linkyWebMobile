@@ -12,80 +12,78 @@ function Home() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  
-  // Déconnexion
   const handleLogout = async () => {
     try {
       const response = await axios.post('http://localhost:3000/deconnexion');
       if (response.status === 200) {
         setIsLoggedIn(false);
-      isUserLoggedIn = false;
-      Alert.alert('Déconnexion réussie');
-    } else {
-      Alert.alert('Erreur', response.data.error);
-    }
-  } catch (error) {
-    Alert.alert('Erreur', 'Une erreur est survenue lors de la déconnexion');
-    console.error('Erreur lors de la déconnexion :', error);
-  }
-};
-
-// Connexion
-const handleSubmit = async () => {
-  try {
-    const response = await axios.post('http://localhost:3000/connexion', {
-      username: username,
-      password: password,
-    });
-
-    if (response.status === 200) {
-      setIsLoggedIn(true);
-      isUserLoggedIn = true;
-      
-      Alert.alert('Connexion réussie');
-    } else {
-      Alert.alert('Erreur', response.data.error);
-    }
-  } catch (error) {
-    Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
-    console.error('Erreur lors de la connexion :', error);
-  }
-};
-
-useEffect(() => {
-  const fetchData = async () => {
-    try {
-      if (isLoggedIn && username && password) {
-        const responseInfo = await axios.get(`http://localhost:3000/info/${username}`);
-          const clientId = responseInfo.data.id;
-          setClient_id(clientId);
-          
-          const responseLatest = await axios.get(`http://localhost:3000/conso/last/${clientId}`);
-          setLatestConso(responseLatest.data[0]);
-          
-          const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${clientId}`);
-          setDifference(responseDifference.data.difference);
+        isUserLoggedIn = false;
+        Alert.alert('Déconnexion réussie');
+      } else {
+        Alert.alert('Erreur', response.data.error);
       }
     } catch (error) {
-      console.error('Erreur lors de la récupération des données :', error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la déconnexion');
+      console.error('Erreur lors de la déconnexion :', error);
     }
   };
-  
-  fetchData();
-}, [isLoggedIn, username, password]);
 
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/connexion', {
+        username: username,
+        password: password,
+      });
 
+      if (response.status === 200) {
+        setIsLoggedIn(true);
+        isUserLoggedIn = true;
+        Alert.alert('Connexion réussie');
+      } else {
+        Alert.alert('Erreur', response.data.error);
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
+      console.error('Erreur lors de la connexion :', error);
+    }
+  };
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        if (isLoggedIn && username) {
+          console.log('Fetching client ID...');
+          const responseInfo = await axios.get(`http://localhost:3000/info/${username}`);
+          const clientId = responseInfo.data.id;
+          setClient_id(clientId);
+          console.log('Client ID:', clientId);
 
+          console.log('Fetching latest consumption...');
+          const responseLatest = await axios.get(`http://localhost:3000/conso/last/${clientId}`);
+          setLatestConso(responseLatest.data[0]);
+          console.log('Latest Consumption:', responseLatest.data[0]);
 
-return (
-  <View style={styles.container}>
+          console.log('Fetching difference...');
+          const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${clientId}`);
+          setDifference(responseDifference.data.difference);
+          console.log('Difference:', responseDifference.data.difference);
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des données :', error);
+      }
+    };
+
+    fetchData();
+  }, [isLoggedIn, username]);
+
+  return (
+    <View style={styles.container}>
       {isLoggedIn === false ? (
         <View>
           <Text>Veuillez vous connecter</Text>
           <TextInput
             style={styles.input}
-            placeholder="Nom d'utilisateur ou Email"
+            placeholder="Nom d'utilisateur"
             onChangeText={text => setUsername(text)}
             value={username}
           />
@@ -94,24 +92,25 @@ return (
             placeholder="Mot de passe"
             onChangeText={text => setPassword(text)}
             value={password}
-            secureTextEntry // Masque le texte saisi
+            secureTextEntry
           />
           <Button title="Se connecter" onPress={handleSubmit} />
         </View>
       ) : (
         <View>
           <Text style={styles.text}>Bienvenue sur votre espace personnel{'\n'}{username}</Text>
-      <Text style={styles.text}>Consommation de la veille:</Text>
-      {latestConso && (
-        <View style={styles.consoContainer}>
-          <Text style={styles.kw}>Kw: {latestConso.kw}</Text>
-        </View>
-      )}
-      {difference !== null && ( 
-        <View style={styles.differenceContainer}>
-          <Text style={styles.differenceText}>Différence par rapport à il y a deux jours: {difference}</Text>
-        </View>
-      )}
+          <Text style={styles.text}>Consommation de la veille:</Text>
+          {latestConso && (
+            <View style={styles.consoContainer}>
+              <Text style={styles.kw}>Kw: {latestConso.kw}</Text>
+            </View>
+          )}
+          {difference !== null && ( 
+            <View style={styles.differenceContainer}>
+              <Text style={styles.differenceText}>Différence par rapport à il y a deux jours: {difference}</Text>
+            </View>
+          )}
+          <Button title="Se déconnecter" onPress={handleLogout} />
         </View>
       )}
     </View>
