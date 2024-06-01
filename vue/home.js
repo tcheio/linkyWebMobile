@@ -11,6 +11,10 @@ function Home() {
   const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [showSignUp, setShowSignUp] = useState(false); // New state for showing sign-up form
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [tel, setTel] = useState('');
 
   const handleLogout = async () => {
     try {
@@ -48,6 +52,28 @@ function Home() {
     }
   };
 
+  const handleSignUp = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/inscription', {
+        nom: name,
+        email: email,
+        tel: tel,
+        username: username,
+        password: password,
+      });
+
+      if (response.status === 201) {
+        Alert.alert('Inscription réussie');
+        setShowSignUp(false);
+      } else {
+        Alert.alert('Erreur', response.data.error);
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'inscription');
+      console.error('Erreur lors de l\'inscription :', error);
+    }
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -80,21 +106,65 @@ function Home() {
     <View style={styles.container}>
       {isLoggedIn === false ? (
         <View>
-          <Text>Veuillez vous connecter</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nom d'utilisateur"
-            onChangeText={text => setUsername(text)}
-            value={username}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Mot de passe"
-            onChangeText={text => setPassword(text)}
-            value={password}
-            secureTextEntry
-          />
-          <Button title="Se connecter" onPress={handleSubmit} />
+          {showSignUp ? (
+            // Sign-Up Form
+            <View>
+              <Text>S'inscrire</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nom"
+                onChangeText={text => setName(text)}
+                value={name}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Email"
+                onChangeText={text => setEmail(text)}
+                value={email}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Téléphone"
+                onChangeText={text => setTel(text)}
+                value={tel}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Nom d'utilisateur"
+                onChangeText={text => setUsername(text)}
+                value={username}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Mot de passe"
+                onChangeText={text => setPassword(text)}
+                value={password}
+                secureTextEntry
+              />
+              <Button title="S'inscrire" onPress={handleSignUp} />
+              <Button title="Déjà inscrit ? Se connecter" onPress={() => setShowSignUp(false)} />
+            </View>
+          ) : (
+            // Login Form
+            <View>
+              <Text>Veuillez vous connecter</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="Nom d'utilisateur"
+                onChangeText={text => setUsername(text)}
+                value={username}
+              />
+              <TextInput
+                style={styles.input}
+                placeholder="Mot de passe"
+                onChangeText={text => setPassword(text)}
+                value={password}
+                secureTextEntry
+              />
+              <Button title="Se connecter" onPress={handleSubmit} />
+              <Button title="S'inscrire" onPress={() => setShowSignUp(true)} />
+            </View>
+          )}
         </View>
       ) : (
         <View>
