@@ -9,7 +9,7 @@ function Global() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get('http://localhost:3000/conso/latest/1');
+        const response = await axios.get('http://localhost:3000/conso/latest/1/2024-04-27/2024-05-02');
         setData(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des données depuis l\'API:', error);
