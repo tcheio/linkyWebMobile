@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert, Dimensions } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 
@@ -133,27 +133,29 @@ function Home() {
           )}
         </View>
       ) : (
-        <View style={styles.container}>
-      <Text style={styles.welcomeText}>Bienvenue sur votre espace client</Text>
-      <Text style={styles.usernameText}>{username}</Text>
+        <View style={styles.loggedInContainer}>
+          <Text style={styles.welcomeText}>Bienvenue sur votre espace client</Text>
+          <Text style={styles.usernameText}>{username}</Text>
 
-      <View style={styles.row}>
-        <View style={[styles.box, styles.boxBlue]}>
-          <Text style={styles.boxText}>Dernière consommation: {latestConso ? `${latestConso.kw} kW` : 'N/A'}</Text>
-        </View>
-        <View style={[styles.box, styles.boxRed]}>
-          <Text style={styles.boxText}>Différence: {difference !== null ? `${difference} kW` : 'N/A'}</Text>
-        </View>
-      </View>
+          <View style={styles.row}>
+            <View style={[styles.box, styles.boxBlue]}>
+              <Text style={styles.boxText}>Dernière consommation: {latestConso ? `${latestConso.kw} kW` : 'N/A'}</Text>
+            </View>
+            <View style={[styles.box, styles.boxRed]}>
+              <Text style={styles.boxText}>Différence: {difference !== null ? `${difference} kW` : 'N/A'}</Text>
+            </View>
+          </View>
 
-      <View style={[styles.box, styles.boxGrey]}>
-        <Text style={styles.boxText}>Moyenne: N/A</Text>
-      </View>
-    </View>
+          <View style={[styles.box, styles.boxGrey]}>
+            <Text style={styles.boxText}>Moyenne: N/A</Text>
+          </View>
+        </View>
       )}
     </View>
   );
 }
+
+const { width } = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -191,26 +193,19 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   usernameText: {
-    fontSize: 18,
+    fontSize: 20,
+    fontWeight: 'bold',
     textAlign: 'center',
     marginBottom: 20,
-  },
-  infoContainer: {
-    alignItems: 'center',
-  },
-  infoText: {
-    fontSize: 18,
-    color: '#333',
-    marginBottom: 10,
   },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-around',
     width: '100%',
-    paddingHorizontal: 20,
+    paddingHorizontal: 10,
   },
   box: {
-    width: 150,
+    width: width * 0.4,
     height: 100,
     justifyContent: 'center',
     alignItems: 'center',
@@ -225,14 +220,17 @@ const styles = StyleSheet.create({
   },
   boxGrey: {
     backgroundColor: 'grey',
-    width: '60%',
+    width: width * 0.8, 
   },
   boxText: {
     color: 'white',
     textAlign: 'center',
   },
-
-
+  loggedInContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default Home;
