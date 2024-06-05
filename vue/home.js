@@ -133,12 +133,23 @@ function Home() {
           )}
         </View>
       ) : (
-        <View style={styles.infoContainer}>
-          <Text style={styles.welcomeText}>Bienvenue {username}</Text>
-          <Text style={styles.infoText}>Dernière consommation: {latestConso ? latestConso.kw : 'N/A'} kW</Text>
-          <Text style={styles.infoText}>Différence: {difference ? difference : 'N/A'} kW</Text>
-          <Button title="Se déconnecter" onPress={handleLogout} />
+        <View style={styles.container}>
+      <Text style={styles.welcomeText}>Bienvenue sur votre espace client</Text>
+      <Text style={styles.usernameText}>{username}</Text>
+
+      <View style={styles.row}>
+        <View style={[styles.box, styles.boxBlue]}>
+          <Text style={styles.boxText}>Dernière consommation: {latestConso ? `${latestConso.kw} kW` : 'N/A'}</Text>
         </View>
+        <View style={[styles.box, styles.boxRed]}>
+          <Text style={styles.boxText}>Différence: {difference !== null ? `${difference} kW` : 'N/A'}</Text>
+        </View>
+      </View>
+
+      <View style={[styles.box, styles.boxGrey]}>
+        <Text style={styles.boxText}>Moyenne: N/A</Text>
+      </View>
+    </View>
       )}
     </View>
   );
@@ -179,6 +190,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
+  usernameText: {
+    fontSize: 18,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
   infoContainer: {
     alignItems: 'center',
   },
@@ -187,6 +203,36 @@ const styles = StyleSheet.create({
     color: '#333',
     marginBottom: 10,
   },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    paddingHorizontal: 20,
+  },
+  box: {
+    width: 150,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 10,
+    borderRadius: 5,
+  },
+  boxBlue: {
+    backgroundColor: 'blue',
+  },
+  boxRed: {
+    backgroundColor: 'red',
+  },
+  boxGrey: {
+    backgroundColor: 'grey',
+    width: '60%',
+  },
+  boxText: {
+    color: 'white',
+    textAlign: 'center',
+  },
+
+
 });
 
 export default Home;
