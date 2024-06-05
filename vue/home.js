@@ -1,27 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, StyleSheet, TextInput, Button, Alert, Dimensions } from 'react-native';
 import axios from 'axios';
-
-let isUserLoggedIn = false;
+import { AuthContext } from '../Controlleur/AuthContext';
 
 function Home() {
-  const [clientid, setClient_id] = useState(null); 
-  const [latestConso, setLatestConso] = useState(null);
-  const [difference, setDifference] = useState(null); 
-  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn);
+  const { isLoggedIn, userId, login, logout } = useContext(AuthContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [showSignUp, setShowSignUp] = useState(false); // New state for showing sign-up form
+  const [showSignUp, setShowSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [tel, setTel] = useState('');
+  const [latestConso, setLatestConso] = useState(null);
+  const [difference, setDifference] = useState(null);
 
   const handleLogout = async () => {
     try {
       const response = await axios.post('http://localhost:3000/deconnexion');
       if (response.status === 200) {
-        setIsLoggedIn(false);
-        isUserLoggedIn = false;
+        logout();
         Alert.alert('Déconnexion réussie');
       } else {
         Alert.alert('Erreur', response.data.error);
@@ -40,8 +37,7 @@ function Home() {
       });
 
       if (response.status === 200) {
-        setIsLoggedIn(true);
-        isUserLoggedIn = true;
+        login(response.data.id, username);
         Alert.alert('Connexion réussie');
       } else {
         Alert.alert('Erreur', response.data.error);
@@ -52,45 +48,17 @@ function Home() {
     }
   };
 
-  const handleSignUp = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/inscription', {
-        nom: name,
-        email: email,
-        tel: tel,
-        username: username,
-        password: password,
-      });
-
-      if (response.status === 201) {
-        Alert.alert('Inscription réussie');
-        setShowSignUp(false);
-      } else {
-        Alert.alert('Erreur', response.data.error);
-      }
-    } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'inscription');
-      console.error('Erreur lors de l\'inscription :', error);
-    }
-  };
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (isLoggedIn && username) {
-          console.log('Fetching client ID...');
-          const responseInfo = await axios.get(`http://localhost:3000/info/${username}`);
-          const clientId = responseInfo.data.id;
-          setClient_id(clientId);
-          console.log('Client ID:', clientId);
-
+        if (isLoggedIn && userId) {
           console.log('Fetching latest consumption...');
-          const responseLatest = await axios.get(`http://localhost:3000/conso/last/${clientId}`);
+          const responseLatest = await axios.get(`http://localhost:3000/conso/last/${userId}`);
           setLatestConso(responseLatest.data[0]);
           console.log('Latest Consumption:', responseLatest.data[0]);
 
           console.log('Fetching difference...');
-          const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${clientId}`);
+          const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${userId}`);
           setDifference(responseDifference.data.difference);
           console.log('Difference:', responseDifference.data.difference);
         }
@@ -100,16 +68,15 @@ function Home() {
     };
 
     fetchData();
-  }, [isLoggedIn, username]);
+  }, [isLoggedIn, userId]);
 
   return (
     <View style={styles.container}>
-      {isLoggedIn === false ? (
-        <View>
+      {!isLoggedIn ? (
+        <View style={styles.formContainer}>
           {showSignUp ? (
-            // Sign-Up Form
-            <View>
-              <Text>S'inscrire</Text>
+            <View style={styles.form}>
+              <Text style={styles.title}>S'inscrire</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Nom"
@@ -145,9 +112,8 @@ function Home() {
               <Button title="Déjà inscrit ? Se connecter" onPress={() => setShowSignUp(false)} />
             </View>
           ) : (
-            // Login Form
-            <View>
-              <Text>Veuillez vous connecter</Text>
+            <View style={styles.form}>
+              <Text style={styles.title}>Veuillez vous connecter</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Nom d'utilisateur"
@@ -167,60 +133,103 @@ function Home() {
           )}
         </View>
       ) : (
-        <View>
-          <Text style={styles.text}>Bienvenue sur votre espace personnel{'\n'}{username}</Text>
-          <Text style={styles.text}>Consommation de la veille:</Text>
-          {latestConso && (
-            <View style={styles.consoContainer}>
-              <Text style={styles.kw}>Kw: {latestConso.kw}</Text>
+        <View style={styles.loggedInContainer}>
+          <Text style={styles.welcomeText}>Bienvenue sur votre espace client</Text>
+          <Text style={styles.usernameText}>{username}</Text>
+
+          <View style={styles.row}>
+            <View style={[styles.box, styles.boxBlue]}>
+              <Text style={styles.boxText}>Dernière consommation: {latestConso ? `${latestConso.kw} kW` : 'N/A'}</Text>
             </View>
-          )}
-          {difference !== null && ( 
-            <View style={styles.differenceContainer}>
-              <Text style={styles.differenceText}>Différence par rapport à il y a deux jours: {difference}</Text>
+            <View style={[styles.box, styles.boxRed]}>
+              <Text style={styles.boxText}>Différence: {difference !== null ? `${difference} kW` : 'N/A'}</Text>
             </View>
-          )}
-          <Button title="Se déconnecter" onPress={handleLogout} />
+          </View>
+
+          <View style={[styles.box, styles.boxGrey]}>
+            <Text style={styles.boxText}>Moyenne: N/A</Text>
+          </View>
         </View>
       )}
     </View>
   );
 }
 
+const { width } = Dimensions.get('window');
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
   },
-  text: {
-    fontSize: 18,
-    marginBottom: 10,
+  formContainer: {
+    alignItems: 'center',
   },
-  kw: {
-    fontSize: 18,
-    marginBottom: 12,
+  form: {
+    width: '100%',
+    alignItems: 'center',
   },
-  consoContainer: {
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
     marginBottom: 20,
-  },
-  differenceContainer: {
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-  },
-  differenceText: {
-    fontSize: 18,
   },
   input: {
     height: 40,
-    width: 250,
-    margin: 10,
+    width: '100%',
+    marginVertical: 10,
     borderWidth: 1,
+    borderColor: '#ccc',
     paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  usernameText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    width: '100%',
+    paddingHorizontal: 10,
+  },
+  box: {
+    width: width * 0.4,
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+    margin: 10,
+    borderRadius: 5,
+  },
+  boxBlue: {
+    backgroundColor: 'blue',
+  },
+  boxRed: {
+    backgroundColor: 'red',
+  },
+  boxGrey: {
+    backgroundColor: 'grey',
+    width: width * 0.8, 
+  },
+  boxText: {
+    color: 'white',
+    textAlign: 'center',
+  },
+  loggedInContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
