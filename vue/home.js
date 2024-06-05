@@ -1,56 +1,19 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import axios from 'axios';
-
-let isUserLoggedIn = false;
+import { AuthContext } from '../Controlleur/AuthContext';
 
 function Home() {
-  const [clientid, setClient_id] = useState(null); 
+  const { isLoggedIn, username, login, logout } = useContext(AuthContext);
+  const [clientId, setClientId] = useState(null);
   const [latestConso, setLatestConso] = useState(null);
-  const [difference, setDifference] = useState(null); 
-  const [isLoggedIn, setIsLoggedIn] = useState(isUserLoggedIn);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [showSignUp, setShowSignUp] = useState(false); // New state for showing sign-up form
+  const [difference, setDifference] = useState(null);
+  const [showSignUp, setShowSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [tel, setTel] = useState('');
-
-  const handleLogout = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/deconnexion');
-      if (response.status === 200) {
-        setIsLoggedIn(false);
-        isUserLoggedIn = false;
-        Alert.alert('Déconnexion réussie');
-      } else {
-        Alert.alert('Erreur', response.data.error);
-      }
-    } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la déconnexion');
-      console.error('Erreur lors de la déconnexion :', error);
-    }
-  };
-
-  const handleSubmit = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/connexion', {
-        username: username,
-        password: password,
-      });
-
-      if (response.status === 200) {
-        setIsLoggedIn(true);
-        isUserLoggedIn = true;
-        Alert.alert('Connexion réussie');
-      } else {
-        Alert.alert('Erreur', response.data.error);
-      }
-    } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
-      console.error('Erreur lors de la connexion :', error);
-    }
-  };
+  const [localUsername, setLocalUsername] = useState('');
+  const [localPassword, setLocalPassword] = useState('');
 
   const handleSignUp = async () => {
     try {
@@ -58,8 +21,8 @@ function Home() {
         nom: name,
         email: email,
         tel: tel,
-        username: username,
-        password: password,
+        username: localUsername,
+        password: localPassword,
       });
 
       if (response.status === 201) {
@@ -81,7 +44,7 @@ function Home() {
           console.log('Fetching client ID...');
           const responseInfo = await axios.get(`http://localhost:3000/info/${username}`);
           const clientId = responseInfo.data.id;
-          setClient_id(clientId);
+          setClientId(clientId);
           console.log('Client ID:', clientId);
 
           console.log('Fetching latest consumption...');
@@ -104,12 +67,11 @@ function Home() {
 
   return (
     <View style={styles.container}>
-      {isLoggedIn === false ? (
-        <View>
+      {!isLoggedIn ? (
+        <View style={styles.formContainer}>
           {showSignUp ? (
-            // Sign-Up Form
-            <View>
-              <Text>S'inscrire</Text>
+            <View style={styles.form}>
+              <Text style={styles.title}>S'inscrire</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Nom"
@@ -131,56 +93,55 @@ function Home() {
               <TextInput
                 style={styles.input}
                 placeholder="Nom d'utilisateur"
-                onChangeText={text => setUsername(text)}
-                value={username}
+                onChangeText={text => setLocalUsername(text)}
+                value={localUsername}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Mot de passe"
-                onChangeText={text => setPassword(text)}
-                value={password}
+                onChangeText={text => setLocalPassword(text)}
+                value={localPassword}
                 secureTextEntry
               />
               <Button title="S'inscrire" onPress={handleSignUp} />
               <Button title="Déjà inscrit ? Se connecter" onPress={() => setShowSignUp(false)} />
             </View>
           ) : (
-            // Login Form
-            <View>
-              <Text>Veuillez vous connecter</Text>
+            <View style={styles.form}>
+              <Text style={styles.title}>Veuillez vous connecter</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Nom d'utilisateur"
-                onChangeText={text => setUsername(text)}
-                value={username}
+                onChangeText={text => setLocalUsername(text)}
+                value={localUsername}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Mot de passe"
-                onChangeText={text => setPassword(text)}
-                value={password}
+                onChangeText={text => setLocalPassword(text)}
+                value={localPassword}
                 secureTextEntry
               />
-              <Button title="Se connecter" onPress={handleSubmit} />
+              <Button title="Se connecter" onPress={() => login(localUsername, localPassword)} />
               <Button title="S'inscrire" onPress={() => setShowSignUp(true)} />
             </View>
           )}
         </View>
       ) : (
-        <View>
-          <Text style={styles.text}>Bienvenue sur votre espace personnel{'\n'}{username}</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.welcomeText}>Bienvenue {username}</Text>
           <Text style={styles.text}>Consommation de la veille:</Text>
           {latestConso && (
             <View style={styles.consoContainer}>
               <Text style={styles.kw}>Kw: {latestConso.kw}</Text>
             </View>
           )}
-          {difference !== null && ( 
+          {difference !== null && (
             <View style={styles.differenceContainer}>
               <Text style={styles.differenceText}>Différence par rapport à il y a deux jours: {difference}</Text>
             </View>
           )}
-          <Button title="Se déconnecter" onPress={handleLogout} />
+          <Button title="Se déconnecter" onPress={logout} />
         </View>
       )}
     </View>
@@ -192,10 +153,40 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 20,
+  },
+  formContainer: {
+    alignItems: 'center',
+  },
+  form: {
+    width: '100%',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    width: '100%',
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
   },
   text: {
     fontSize: 18,
     marginBottom: 10,
+    textAlign: 'center',
   },
   kw: {
     fontSize: 18,
@@ -214,13 +205,6 @@ const styles = StyleSheet.create({
   },
   differenceText: {
     fontSize: 18,
-  },
-  input: {
-    height: 40,
-    width: 250,
-    margin: 10,
-    borderWidth: 1,
-    paddingHorizontal: 10,
   },
 });
 

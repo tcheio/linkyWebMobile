@@ -1,23 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import React, { useState, useEffect, useContext } from 'react';
+import { View, StyleSheet, Text } from 'react-native';
 import { XYPlot, XAxis, YAxis, HorizontalGridLines, VerticalBarSeries } from 'react-vis';
 import axios from 'axios';
+import { AuthContext } from '../Controlleur/AuthContext';
 
 function Global() {
+  const { isLoggedIn, username } = useContext(AuthContext);
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        const response = await axios.get('http://localhost:3000/conso/latest/1/2024-04-27/2024-05-02');
-        setData(response.data);
-      } catch (error) {
-        console.error('Erreur lors de la récupération des données depuis l\'API:', error);
+      if (isLoggedIn && username) {
+        try {
+          const response = await axios.get('http://localhost:3000/conso/latest/1/2024-04-27/2024-05-02');
+          setData(response.data);
+        } catch (error) {
+          console.error('Erreur lors de la récupération des données depuis l\'API:', error);
+        }
       }
     };
 
     fetchData();
-  }, []);
+  }, [isLoggedIn, username]);
 
   const formattedData = data.map(item => ({ x: new Date(item.date), y: item.kw }));
 
@@ -34,13 +38,21 @@ function Global() {
     }));
   }).flat();
 
+  if (!isLoggedIn) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>Veuillez vous connecter pour voir les données.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <XYPlot height={500} width={500}>
         <HorizontalGridLines />
         <VerticalBarSeries data={barSeries} barWidth={0.2} />
         <XAxis tickValues={uniqueDates} tickFormat={d => `${d.getDate()}/${d.getMonth() + 1}`} />
-        <YAxis/>
+        <YAxis />
       </XYPlot>
     </View>
   );
@@ -52,6 +64,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+  },
+  text: {
+    fontSize: 18,
+    color: '#333',
+    textAlign: 'center',
+    margin: 20,
   },
 });
 

@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import axios from 'axios';
+import { AuthContext } from '../Controlleur/AuthContext';
 
 function CompteScreen() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [clientId, setClientId] = useState(null);
-  const [clientInfo, setClientInfo] = useState(null); // Ajout de l'état pour stocker les informations du client
+  const { isLoggedIn, username, login, logout } = useContext(AuthContext);
+  const [clientInfo, setClientInfo] = useState(null);
+  const [localUsername, setLocalUsername] = useState('');
+  const [localPassword, setLocalPassword] = useState('');
 
   useEffect(() => {
-    // Fonction pour récupérer les informations du client à partir de l'API
     const fetchClientInfo = async () => {
       try {
         const response = await axios.get(`http://localhost:3000/info/all/${username}`);
         if (response.data && response.data.id) {
-          setClientInfo(response.data); // Met à jour l'état avec les informations complètes du client récupérées
+          setClientInfo(response.data);
         } else {
           console.error('Aucune donnée de client récupérée');
         }
@@ -29,74 +28,38 @@ function CompteScreen() {
     }
   }, [isLoggedIn, username]);
 
-  // Déconnexion
-  const handleLogout = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/deconnexion');
-      if (response.status === 200) {
-        setIsLoggedIn(false);
-        Alert.alert('Déconnexion réussie');
-      } else {
-        Alert.alert('Erreur', response.data.error);
-      }
-    } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la déconnexion');
-      console.error('Erreur lors de la déconnexion :', error);
-    }
-  };
-
-  // Connexion
-  const handleSubmit = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/connexion', {
-        username: username,
-        password: password,
-      });
-
-      if (response.status === 200) {
-        setIsLoggedIn(true);
-        Alert.alert('Connexion réussie');
-      } else {
-        Alert.alert('Erreur', response.data.error);
-      }
-    } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
-      console.error('Erreur lors de la connexion :', error);
-    }
-  };
-
   return (
     <View style={styles.container}>
       {!isLoggedIn ? (
-        <View>
-          <Text>Veuillez vous connecter</Text>
+        <View style={styles.loginContainer}>
+          <Text style={styles.title}>Veuillez vous connecter</Text>
           <TextInput
             style={styles.input}
             placeholder="Nom d'utilisateur ou Email"
-            onChangeText={text => setUsername(text)}
-            value={username}
+            onChangeText={text => setLocalUsername(text)}
+            value={localUsername}
           />
           <TextInput
             style={styles.input}
             placeholder="Mot de passe"
-            onChangeText={text => setPassword(text)}
-            value={password}
-            secureTextEntry // Masque le texte saisi
+            onChangeText={text => setLocalPassword(text)}
+            value={localPassword}
+            secureTextEntry
           />
-          <Button title="Se connecter" onPress={handleSubmit} />
+          <Button title="Se connecter" onPress={() => login(localUsername, localPassword)} />
         </View>
       ) : (
-        <View>
-          <Text>Bienvenue {username}</Text>
+        <View style={styles.infoContainer}>
+          <Text style={styles.welcomeText}>Bienvenue {username}</Text>
           {clientInfo && (
-            <View>
-              <Text>Numero User: {clientInfo.id}</Text>
-              <Text>Nom: {clientInfo.nom}</Text>
-              <Text>Téléphone: {clientInfo.tel}</Text>
-              <Text>Email: {clientInfo.email}</Text>
+            <View style={styles.clientInfo}>
+              <Text style={styles.infoText}>Numero User: {clientInfo.id}</Text>
+              <Text style={styles.infoText}>Nom: {clientInfo.nom}</Text>
+              <Text style={styles.infoText}>Téléphone: {clientInfo.tel}</Text>
+              <Text style={styles.infoText}>Email: {clientInfo.email}</Text>
             </View>
           )}
-          <Button title="Déconnexion" onPress={handleLogout} />
+          <Button title="Déconnexion" onPress={logout} />
         </View>
       )}
     </View>
@@ -107,14 +70,46 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     justifyContent: 'center',
+    padding: 20,
+  },
+  loginContainer: {
     alignItems: 'center',
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
   },
   input: {
     height: 40,
-    width: 250,
-    margin: 10,
+    width: '100%',
+    marginVertical: 10,
     borderWidth: 1,
+    borderColor: '#ccc',
     paddingHorizontal: 10,
+    borderRadius: 5,
+  },
+  welcomeText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#333',
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  infoContainer: {
+    alignItems: 'center',
+  },
+  clientInfo: {
+    backgroundColor: '#f9f9f9',
+    padding: 20,
+    borderRadius: 10,
+    marginBottom: 20,
+    width: '100%',
+  },
+  infoText: {
+    fontSize: 16,
+    marginBottom: 10,
+    color: '#555',
   },
 });
 
