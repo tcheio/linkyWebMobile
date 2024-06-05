@@ -4,7 +4,7 @@ import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 
 function CompteScreen() {
-  const { isLoggedIn, username, login, logout } = useContext(AuthContext);
+  const { isLoggedIn, username, login, userId, logout } = useContext(AuthContext);
   const [clientInfo, setClientInfo] = useState(null);
   const [localUsername, setLocalUsername] = useState('');
   const [localPassword, setLocalPassword] = useState('');
@@ -12,7 +12,7 @@ function CompteScreen() {
   useEffect(() => {
     const fetchClientInfo = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/info/all/${username}`);
+        const response = await axios.get(`http://localhost:3000/info/all/${userId}`);
         if (response.data && response.data.id) {
           setClientInfo(response.data);
         } else {

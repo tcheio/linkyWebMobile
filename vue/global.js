@@ -5,14 +5,14 @@ import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 
 function Global() {
-  const { isLoggedIn, username } = useContext(AuthContext);
+  const { isLoggedIn, userId } = useContext(AuthContext);
   const [data, setData] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
-      if (isLoggedIn && username) {
+      if (isLoggedIn && userId) {
         try {
-          const response = await axios.get('http://localhost:3000/conso/latest/1/2024-04-27/2024-05-02');
+          const response = await axios.get(`http://localhost:3000/conso/latest/${userId}/2024-04-27/2024-05-03`);
           setData(response.data);
         } catch (error) {
           console.error('Erreur lors de la récupération des données depuis l\'API:', error);
@@ -21,7 +21,7 @@ function Global() {
     };
 
     fetchData();
-  }, [isLoggedIn, username]);
+  }, [isLoggedIn, userId]);
 
   const formattedData = data.map(item => ({ x: new Date(item.date), y: item.kw }));
 
