@@ -4,56 +4,61 @@ import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 
 function Home() {
-  const { isLoggedIn, username, login, logout } = useContext(AuthContext);
-  const [clientId, setClientId] = useState(null);
-  const [latestConso, setLatestConso] = useState(null);
-  const [difference, setDifference] = useState(null);
+  const { isLoggedIn, userId, login, logout } = useContext(AuthContext);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [showSignUp, setShowSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [tel, setTel] = useState('');
-  const [localUsername, setLocalUsername] = useState('');
-  const [localPassword, setLocalPassword] = useState('');
+  const [latestConso, setLatestConso] = useState(null);
+  const [difference, setDifference] = useState(null);
 
-  const handleSignUp = async () => {
+  const handleLogout = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/inscription', {
-        nom: name,
-        email: email,
-        tel: tel,
-        username: localUsername,
-        password: localPassword,
-      });
-
-      if (response.status === 201) {
-        Alert.alert('Inscription réussie');
-        setShowSignUp(false);
+      const response = await axios.post('http://localhost:3000/deconnexion');
+      if (response.status === 200) {
+        logout();
+        Alert.alert('Déconnexion réussie');
       } else {
         Alert.alert('Erreur', response.data.error);
       }
     } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'inscription');
-      console.error('Erreur lors de l\'inscription :', error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la déconnexion');
+      console.error('Erreur lors de la déconnexion :', error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/connexion', {
+        username: username,
+        password: password,
+      });
+
+      if (response.status === 200) {
+        login(response.data.id, username);
+        Alert.alert('Connexion réussie');
+      } else {
+        Alert.alert('Erreur', response.data.error);
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
+      console.error('Erreur lors de la connexion :', error);
     }
   };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (isLoggedIn && username) {
-          console.log('Fetching client ID...');
-          const responseInfo = await axios.get(`http://localhost:3000/info/${username}`);
-          const clientId = responseInfo.data.id;
-          setClientId(clientId);
-          console.log('Client ID:', clientId);
-
+        if (isLoggedIn && userId) {
           console.log('Fetching latest consumption...');
-          const responseLatest = await axios.get(`http://localhost:3000/conso/last/${clientId}`);
+          const responseLatest = await axios.get(`http://localhost:3000/conso/last/${userId}`);
           setLatestConso(responseLatest.data[0]);
           console.log('Latest Consumption:', responseLatest.data[0]);
 
           console.log('Fetching difference...');
-          const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${clientId}`);
+          const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${userId}`);
           setDifference(responseDifference.data.difference);
           console.log('Difference:', responseDifference.data.difference);
         }
@@ -63,7 +68,7 @@ function Home() {
     };
 
     fetchData();
-  }, [isLoggedIn, username]);
+  }, [isLoggedIn, userId]);
 
   return (
     <View style={styles.container}>
@@ -93,14 +98,14 @@ function Home() {
               <TextInput
                 style={styles.input}
                 placeholder="Nom d'utilisateur"
-                onChangeText={text => setLocalUsername(text)}
-                value={localUsername}
+                onChangeText={text => setUsername(text)}
+                value={username}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Mot de passe"
-                onChangeText={text => setLocalPassword(text)}
-                value={localPassword}
+                onChangeText={text => setPassword(text)}
+                value={password}
                 secureTextEntry
               />
               <Button title="S'inscrire" onPress={handleSignUp} />
@@ -112,17 +117,17 @@ function Home() {
               <TextInput
                 style={styles.input}
                 placeholder="Nom d'utilisateur"
-                onChangeText={text => setLocalUsername(text)}
-                value={localUsername}
+                onChangeText={text => setUsername(text)}
+                value={username}
               />
               <TextInput
                 style={styles.input}
                 placeholder="Mot de passe"
-                onChangeText={text => setLocalPassword(text)}
-                value={localPassword}
+                onChangeText={text => setPassword(text)}
+                value={password}
                 secureTextEntry
               />
-              <Button title="Se connecter" onPress={() => login(localUsername, localPassword)} />
+              <Button title="Se connecter" onPress={handleSubmit} />
               <Button title="S'inscrire" onPress={() => setShowSignUp(true)} />
             </View>
           )}
@@ -130,18 +135,9 @@ function Home() {
       ) : (
         <View style={styles.infoContainer}>
           <Text style={styles.welcomeText}>Bienvenue {username}</Text>
-          <Text style={styles.text}>Consommation de la veille:</Text>
-          {latestConso && (
-            <View style={styles.consoContainer}>
-              <Text style={styles.kw}>Kw: {latestConso.kw}</Text>
-            </View>
-          )}
-          {difference !== null && (
-            <View style={styles.differenceContainer}>
-              <Text style={styles.differenceText}>Différence par rapport à il y a deux jours: {difference}</Text>
-            </View>
-          )}
-          <Button title="Se déconnecter" onPress={logout} />
+          <Text style={styles.infoText}>Dernière consommation: {latestConso ? latestConso.kw : 'N/A'} kW</Text>
+          <Text style={styles.infoText}>Différence: {difference ? difference : 'N/A'} kW</Text>
+          <Button title="Se déconnecter" onPress={handleLogout} />
         </View>
       )}
     </View>
@@ -183,28 +179,13 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
-  text: {
+  infoContainer: {
+    alignItems: 'center',
+  },
+  infoText: {
     fontSize: 18,
+    color: '#333',
     marginBottom: 10,
-    textAlign: 'center',
-  },
-  kw: {
-    fontSize: 18,
-    marginBottom: 12,
-  },
-  consoContainer: {
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-    marginBottom: 20,
-  },
-  differenceContainer: {
-    borderWidth: 1,
-    padding: 10,
-    borderRadius: 5,
-  },
-  differenceText: {
-    fontSize: 18,
   },
 });
 

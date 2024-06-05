@@ -1,55 +1,27 @@
-// AuthContext.js
-import React, { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
-import { Alert } from 'react-native';
+import React, { createContext, useState } from 'react';
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 
-const AuthProvider = ({ children }) => {
+export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState('');
 
-  const login = async (username, password) => {
-    try {
-      const response = await axios.post('http://localhost:3000/connexion', {
-        username: username,
-        password: password,
-      });
-
-      if (response.status === 200) {
-        setIsLoggedIn(true);
-        setUsername(username);
-        Alert.alert('Connexion réussie');
-      } else {
-        Alert.alert('Erreur', response.data.error);
-      }
-    } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la connexion');
-      console.error('Erreur lors de la connexion :', error);
-    }
+  const login = (id, username) => {
+    setIsLoggedIn(true);
+    setUserId(id);
+    setUsername(username);
   };
 
-  const logout = async () => {
-    try {
-      const response = await axios.post('http://localhost:3000/deconnexion');
-      if (response.status === 200) {
-        setIsLoggedIn(false);
-        setUsername('');
-        Alert.alert('Déconnexion réussie');
-      } else {
-        Alert.alert('Erreur', response.data.error);
-      }
-    } catch (error) {
-      Alert.alert('Erreur', 'Une erreur est survenue lors de la déconnexion');
-      console.error('Erreur lors de la déconnexion :', error);
-    }
+  const logout = () => {
+    setIsLoggedIn(false);
+    setUserId(null);
+    setUsername('');
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, username, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userId, username, login, logout }}>
       {children}
     </AuthContext.Provider>
   );
 };
-
-export { AuthContext, AuthProvider };
