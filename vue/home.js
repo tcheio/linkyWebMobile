@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert, Dimensions } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert, Dimensions, ScrollView } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function Home() {
   const { isLoggedIn, userId, login, logout } = useContext(AuthContext);
-  const { selectedCompteur, setSelectedCompteur } = useContext(CompteurContext);
+  const { selectedCompteur, setSelectedCompteur, numCompteur, setNumCompteur } = useContext(CompteurContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showSignUp, setShowSignUp] = useState(false);
@@ -76,8 +76,9 @@ function Home() {
     try {
       const responseCompteur = await axios.get(`http://localhost:3000/user/compteur/${userId}`);
       if (responseCompteur.data) {
-        console.log('Compteurs:', responseCompteur.data[0].id); // Log les compteurs récupérés
+        console.log('Compteurs:', responseCompteur.data[0]); // Log les compteurs récupérés
         setSelectedCompteur(responseCompteur.data[0].id);
+        setNumCompteur(responseCompteur.data[0].numCompteur);
         fetchData(userId, responseCompteur.data[0].id);
       } else {
         console.error('Aucune donnée de compteur récupérée');
@@ -109,7 +110,7 @@ function Home() {
     }
 
     else if (selectedCompteur){
-      fetchData(userId, selectedCompteur); // Fetch data when the user is logged in and selectedCompteur is set
+      fetchData(userId, selectedCompteur);
     }
     
   }, [isLoggedIn, userId, selectedCompteur]);
@@ -177,23 +178,29 @@ function Home() {
           )}
         </View>
       ) : (
-        <View style={styles.loggedInContainer}>
-          <Text style={styles.welcomeText}>Bienvenue sur votre espace client</Text>
-          <Text style={styles.usernameText}>{selectedCompteur}</Text>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.mainContent}>
+            <Text style={styles.welcomeText}>Bienvenue sur votre espace client</Text>
+            <Text style={styles.usernameText}>{username}</Text>
 
-          <View style={styles.row}>
-            <View style={[styles.box, styles.boxBlue]}>
-              <Text style={styles.boxText}>Dernière consommation: {latestConso ? `${latestConso.kw} kW` : 'N/A'}</Text>
+            <View style={styles.row}>
+              <View style={[styles.box, styles.boxBlue]}>
+                <Text style={styles.boxText}>Dernière consommation: {latestConso ? `${latestConso.kw} kW` : 'N/A'}</Text>
+              </View>
+              <View style={[styles.box, styles.boxRed]}>
+                <Text style={styles.boxText}>Différence: {difference !== null ? `${difference} kW` : 'N/A'}</Text>
+              </View>
             </View>
-            <View style={[styles.box, styles.boxRed]}>
-              <Text style={styles.boxText}>Différence: {difference !== null ? `${difference} kW` : 'N/A'}</Text>
+
+            <View style={[styles.box, styles.boxGrey]}>
+              <Text style={styles.boxText}>Moyenne: N/A</Text>
             </View>
           </View>
 
-          <View style={[styles.box, styles.boxGrey]}>
-            <Text style={styles.boxText}>Moyenne: N/A</Text>
+          <View style={styles.footer}>
+            <Text style={styles.compteurText}>Compteur: {numCompteur}</Text>
           </View>
-        </View>
+        </ScrollView>
       )}
     </View>
   );
@@ -229,6 +236,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
   },
+  scrollContainer: {
+    flexGrow: 1,
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 20,
+  },
   welcomeText: {
     fontSize: 24,
     fontWeight: 'bold',
@@ -244,12 +257,13 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     justifyContent: 'space-around',
     width: '100%',
     paddingHorizontal: 10,
   },
   box: {
-    width: width * 0.4,
+    width: '45%',
     height: 100,
     justifyContent: 'center',
     alignItems: 'center',
@@ -264,16 +278,26 @@ const styles = StyleSheet.create({
   },
   boxGrey: {
     backgroundColor: 'grey',
-    width: width * 0.8, 
+    width: '95%',
   },
   boxText: {
     color: 'white',
     textAlign: 'center',
   },
-  loggedInContainer: {
-    flex: 1,
+  mainContent: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  footer: {
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
+    padding: 10,
+  },
+  compteurText: {
+    fontSize: 16,
+    color: '#333',
   },
 });
 
