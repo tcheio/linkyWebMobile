@@ -6,6 +6,7 @@ import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function Home() {
   const { isLoggedIn, userId, login, logout } = useContext(AuthContext);
+  const { selectedCompteur, setSelectedCompteur } = useContext(CompteurContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showSignUp, setShowSignUp] = useState(false);
@@ -14,7 +15,28 @@ function Home() {
   const [tel, setTel] = useState('');
   const [latestConso, setLatestConso] = useState(null);
   const [difference, setDifference] = useState(null);
-  const { selectedCompteur } = useContext(CompteurContext);
+
+  const handleSignUp = async () => {
+    try {
+      const response = await axios.post('http://localhost:3000/inscription', {
+        nom: name,
+        email: email,
+        tel: tel,
+        username: username,
+        password: password,
+      });
+
+      if (response.status === 201) {
+        Alert.alert('Inscription réussie');
+        setShowSignUp(false);
+      } else {
+        Alert.alert('Erreur', response.data.error);
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'inscription');
+      console.error('Erreur lors de l\'inscription :', error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -31,7 +53,7 @@ function Home() {
     }
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async () => {  
     try {
       const response = await axios.post('http://localhost:3000/connexion', {
         username: username,
@@ -50,26 +72,42 @@ function Home() {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        if (isLoggedIn && userId) {
-          console.log('Fetching latest consumption...');
-          const responseLatest = await axios.get(`http://localhost:3000/conso/last/${userId}`);
-          setLatestConso(responseLatest.data[0]);
-          console.log('Latest Consumption:', responseLatest.data[0]);
-
-          console.log('Fetching difference...');
-          const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${userId}`);
-          setDifference(responseDifference.data.difference);
-          console.log('Difference:', responseDifference.data.difference);
-        }
-      } catch (error) {
-        console.error('Erreur lors de la récupération des données :', error);
+  const fetchCompteurAndData = async (userId) => {
+    try {
+      const responseCompteur = await axios.get(`http://localhost:3000/user/compteur/${userId}`);
+      if (responseCompteur.data) {
+        console.log('Compteurs:', responseCompteur.data[0].id); // Log les compteurs récupérés
+        setSelectedCompteur(responseCompteur.data[0].id);
+        fetchData(userId, responseCompteur.data[0].id);
+      } else {
+        console.error('Aucune donnée de compteur récupérée');
       }
-    };
+    } catch (error) {
+      console.error('Erreur lors de la récupération des compteurs :', error);
+    }
+  };
 
-    fetchData();
+  const fetchData = async (userId, compteurId) => {
+    try {
+      console.log('Fetching latest consumption...');
+      const responseLatest = await axios.get(`http://localhost:3000/conso/last/${userId}`);
+      setLatestConso(responseLatest.data[0]);
+      console.log('Latest Consumption:', responseLatest.data[0]);
+
+      console.log('Fetching difference...');
+      const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${userId}`);
+      setDifference(responseDifference.data.difference);
+      console.log('Difference:', responseDifference.data.difference);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des données :', error);
+    }
+  };
+
+  useEffect(() => {
+    if (isLoggedIn && userId && !selectedCompteur) {
+      fetchCompteurAndData(userId); // Fetch compteur and other data when the user logs in and selectedCompteur is not set
+    }
+    
   }, [isLoggedIn, userId]);
 
   return (
