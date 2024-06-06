@@ -90,12 +90,12 @@ function Home() {
   const fetchData = async (userId, compteurId) => {
     try {
       console.log('Fetching latest consumption...');
-      const responseLatest = await axios.get(`http://localhost:3000/conso/last/${userId}`);
+      const responseLatest = await axios.get(`http://localhost:3000/conso/last/${userId}/${compteurId}`);
       setLatestConso(responseLatest.data[0]);
       console.log('Latest Consumption:', responseLatest.data[0]);
 
       console.log('Fetching difference...');
-      const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${userId}`);
+      const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${userId}/${compteurId}`);
       setDifference(responseDifference.data.difference);
       console.log('Difference:', responseDifference.data.difference);
     } catch (error) {
