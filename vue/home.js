@@ -107,8 +107,12 @@ function Home() {
     if (isLoggedIn && userId && !selectedCompteur) {
       fetchCompteurAndData(userId); // Fetch compteur and other data when the user logs in and selectedCompteur is not set
     }
+
+    else if (selectedCompteur){
+      fetchData(userId, selectedCompteur); // Fetch data when the user is logged in and selectedCompteur is set
+    }
     
-  }, [isLoggedIn, userId]);
+  }, [isLoggedIn, userId, selectedCompteur]);
 
   return (
     <View style={styles.container}>
