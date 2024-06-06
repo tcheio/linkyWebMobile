@@ -1,13 +1,16 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert, Picker } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
+import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function CompteScreen() {
   const { isLoggedIn, username, login, userId, logout } = useContext(AuthContext);
+  const { selectedCompteur, setSelectedCompteur } = useContext(CompteurContext);
   const [clientInfo, setClientInfo] = useState(null);
   const [localUsername, setLocalUsername] = useState('');
   const [localPassword, setLocalPassword] = useState('');
+  const [compteurs, setCompteurs] = useState([]);
 
   useEffect(() => {
     const fetchClientInfo = async () => {
@@ -23,45 +26,57 @@ function CompteScreen() {
       }
     };
 
+    const fetchCompteurs = async () => {
+      try {
+        const response = await axios.get(`http://localhost:3000/user/compteurs/${userId}`);
+        if (response.data) {
+          setCompteurs(Array.isArray(response.data) ? response.data : []);
+        } else {
+          console.error('Aucune donnée de compteur récupérée');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la récupération des compteurs :', error);
+      }
+    };
+    
     if (isLoggedIn && username) {
       fetchClientInfo();
+      fetchCompteurs();
     }
   }, [isLoggedIn, username]);
 
+  if (!isLoggedIn) {
+    return (
+      <View style={styles.container}>
+        <Text style={styles.text}>Veuillez vous connecter pour voir les données.</Text>
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
-      {!isLoggedIn ? (
-        <View style={styles.loginContainer}>
-          <Text style={styles.title}>Veuillez vous connecter</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Nom d'utilisateur ou Email"
-            onChangeText={text => setLocalUsername(text)}
-            value={localUsername}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Mot de passe"
-            onChangeText={text => setLocalPassword(text)}
-            value={localPassword}
-            secureTextEntry
-          />
-          <Button title="Se connecter" onPress={() => login(localUsername, localPassword)} />
-        </View>
-      ) : (
-        <View style={styles.infoContainer}>
-          <Text style={styles.welcomeText}>Bienvenue {username}</Text>
-          {clientInfo && (
-            <View style={styles.clientInfo}>
-              <Text style={styles.infoText}>Numero User: {clientInfo.id}</Text>
-              <Text style={styles.infoText}>Nom: {clientInfo.nom}</Text>
-              <Text style={styles.infoText}>Téléphone: {clientInfo.tel}</Text>
-              <Text style={styles.infoText}>Email: {clientInfo.email}</Text>
-            </View>
-          )}
-          <Button title="Déconnexion" onPress={logout} />
-        </View>
-      )}
+      <View style={styles.infoContainer}>
+        <Text style={styles.welcomeText}>Bienvenue {username}</Text>
+        {clientInfo && (
+          <View style={styles.clientInfo}>
+            <Text style={styles.infoText}>Numero User: {clientInfo.id}</Text>
+            <Text style={styles.infoText}>Nom: {clientInfo.nom}</Text>
+            <Text style={styles.infoText}>Téléphone: {clientInfo.tel}</Text>
+            <Text style={styles.infoText}>Email: {clientInfo.email}</Text>
+          </View>
+        )}
+        <Text style={styles.label}>Sélectionnez un compteur:</Text>
+        <Picker
+          selectedValue={selectedCompteur}
+          style={styles.picker}
+          onValueChange={(itemValue, itemIndex) => setSelectedCompteur(itemValue)}
+        >
+          {Array.isArray(compteurs) && compteurs.map(compteur => (
+            <Picker.Item key={compteur.id} label={compteur.nom} value={compteur.id} />
+          ))}
+        </Picker>
+        <Button title="Déconnexion" onPress={logout} />
+      </View>
     </View>
   );
 }
@@ -110,6 +125,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginBottom: 10,
     color: '#555',
+  },
+  label: {
+    fontSize: 16,
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  picker: {
+    height: 50,
+    width: '100%',
+    marginBottom: 20,
   },
 });
 
