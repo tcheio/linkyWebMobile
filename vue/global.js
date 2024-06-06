@@ -3,10 +3,12 @@ import { View, StyleSheet, Text } from 'react-native';
 import { XYPlot, XAxis, YAxis, HorizontalGridLines, VerticalBarSeries } from 'react-vis';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
+import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function Global() {
   const { isLoggedIn, userId } = useContext(AuthContext);
   const [data, setData] = useState([]);
+  const { selectedCompteur } = useContext(CompteurContext);
 
   useEffect(() => {
     const fetchData = async () => {

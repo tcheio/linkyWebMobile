@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, TextInput, Button, Alert, Dimensions } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
+import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function Home() {
   const { isLoggedIn, userId, login, logout } = useContext(AuthContext);
@@ -13,6 +14,7 @@ function Home() {
   const [tel, setTel] = useState('');
   const [latestConso, setLatestConso] = useState(null);
   const [difference, setDifference] = useState(null);
+  const { selectedCompteur } = useContext(CompteurContext);
 
   const handleLogout = async () => {
     try {
@@ -135,7 +137,7 @@ function Home() {
       ) : (
         <View style={styles.loggedInContainer}>
           <Text style={styles.welcomeText}>Bienvenue sur votre espace client</Text>
-          <Text style={styles.usernameText}>{username}</Text>
+          <Text style={styles.usernameText}>{selectedCompteur}</Text>
 
           <View style={styles.row}>
             <View style={[styles.box, styles.boxBlue]}>

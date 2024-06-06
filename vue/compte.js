@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert, Picker } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 import { CompteurContext } from '../Controlleur/CompteurContext';
@@ -30,6 +31,7 @@ function CompteScreen() {
       try {
         const response = await axios.get(`http://localhost:3000/user/compteurs/${userId}`);
         if (response.data) {
+          console.log('Compteurs:', response.data);  // Log les compteurs récupérés
           setCompteurs(Array.isArray(response.data) ? response.data : []);
         } else {
           console.error('Aucune donnée de compteur récupérée');
@@ -38,7 +40,7 @@ function CompteScreen() {
         console.error('Erreur lors de la récupération des compteurs :', error);
       }
     };
-    
+
     if (isLoggedIn && username) {
       fetchClientInfo();
       fetchCompteurs();
@@ -72,7 +74,7 @@ function CompteScreen() {
           onValueChange={(itemValue, itemIndex) => setSelectedCompteur(itemValue)}
         >
           {Array.isArray(compteurs) && compteurs.map(compteur => (
-            <Picker.Item key={compteur.id} label={compteur.nom} value={compteur.id} />
+            <Picker.Item key={compteur.id} label={compteur.numCompteur} value={compteur.id} />
           ))}
         </Picker>
         <Button title="Déconnexion" onPress={logout} />
