@@ -15,6 +15,18 @@ function Home() {
   const [tel, setTel] = useState('');
   const [latestConso, setLatestConso] = useState(null);
   const [difference, setDifference] = useState(null);
+  const [isSmallScreen, setIsSmallScreen] = useState(Dimensions.get('window').width < 400);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsSmallScreen(Dimensions.get('window').width < 400);
+    };
+    
+    Dimensions.addEventListener('change', handleResize);
+    return () => {
+      Dimensions.removeEventListener('change', handleResize);
+    };
+  }, []);
 
   const handleSignUp = async () => {
     try {
@@ -183,7 +195,7 @@ function Home() {
             <Text style={styles.welcomeText}>Bienvenue sur votre espace client</Text>
             <Text style={styles.usernameText}>{username}</Text>
 
-            <View style={styles.row}>
+            <View style={[styles.row, isSmallScreen ? styles.column : null]}>
               <View style={[styles.box, styles.boxBlue]}>
                 <Text style={styles.boxText}>Dernière consommation: {latestConso ? `${latestConso.kw} kW` : 'N/A'}</Text>
               </View>
@@ -262,6 +274,10 @@ const styles = StyleSheet.create({
     width: '100%',
     paddingHorizontal: 10,
   },
+  column: {
+    flexDirection: 'column',
+    alignItems: 'center',
+  },
   box: {
     width: '45%',
     height: 100,
@@ -272,13 +288,15 @@ const styles = StyleSheet.create({
   },
   boxBlue: {
     backgroundColor: 'blue',
+    width: '95%',
   },
   boxRed: {
     backgroundColor: 'red',
+    width: '95%',
   },
   boxGrey: {
     backgroundColor: 'grey',
-    width: '95%',
+    width: '90%',
   },
   boxText: {
     color: 'white',
