@@ -14,7 +14,7 @@ function Global() {
     const fetchData = async () => {
       if (isLoggedIn && userId) {
         try {
-          const response = await axios.get(`http://localhost:3000/conso/latest/${userId}/2024-04-27/2024-05-03`);
+          const response = await axios.get(`http://localhost:3000/conso/latest/${userId}/${selectedCompteur}/2024-04-27/2024-05-03`);
           setData(response.data);
         } catch (error) {
           console.error('Erreur lors de la récupération des données depuis l\'API:', error);
