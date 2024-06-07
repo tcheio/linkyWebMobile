@@ -12,7 +12,7 @@ function Global() {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (isLoggedIn && userId) {
+      if (isLoggedIn && userId && selectedCompteur) {
         try {
           const response = await axios.get(`http://localhost:3000/conso/latest/${userId}/${selectedCompteur}/2024-04-27/2024-05-03`);
           setData(response.data);
@@ -23,16 +23,16 @@ function Global() {
     };
 
     fetchData();
-  }, [isLoggedIn, userId]);
+  }, [isLoggedIn, userId, selectedCompteur]);
 
   const formattedData = data.map(item => ({ x: new Date(item.date), y: item.kw }));
 
   // Obtenir les dates uniques
-  const uniqueDates = [...new Set(formattedData.map(item => item.x))];
+  const uniqueDates = [...new Set(formattedData.map(item => item.x.getTime()))];
 
   // Données pour le graphique
   const barSeries = uniqueDates.map((date, index) => {
-    const barsForDate = formattedData.filter(item => item.x.getTime() === date.getTime());
+    const barsForDate = formattedData.filter(item => item.x.getTime() === date);
     const totalBars = barsForDate.length;
     return barsForDate.map((item, index) => ({
       x: item.x.getTime() + (index - (totalBars - 1) / 2) * 1000 * 60 * 60 * 24,
@@ -50,10 +50,16 @@ function Global() {
 
   return (
     <View style={styles.container}>
-      <XYPlot height={500} width={500}>
+      <XYPlot height={500} width={500} margin={{ left: 60, right: 10, top: 10, bottom: 50 }}>
         <HorizontalGridLines />
         <VerticalBarSeries data={barSeries} barWidth={0.2} />
-        <XAxis tickValues={uniqueDates} tickFormat={d => `${d.getDate()}/${d.getMonth() + 1}`} />
+        <XAxis 
+          tickValues={uniqueDates} 
+          tickFormat={d => {
+            const date = new Date(d);
+            return `${date.getDate()}/${date.getMonth() + 1}`;
+          }} 
+        />
         <YAxis />
       </XYPlot>
     </View>
