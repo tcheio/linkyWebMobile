@@ -16,7 +16,7 @@ function App() {
       <NavigationContainer>
         <Tab.Navigator>
           <Tab.Screen name="Accueil" component={HomeScreen} />
-          <Tab.Screen name="Consommation sur les 7 derniers jours" component={GlobalScreen} />
+          <Tab.Screen name="Statistiques Globales" component={GlobalScreen} />
           <Tab.Screen name="Compte" component={CompteScreen} />
         </Tab.Navigator>
       </NavigationContainer>
