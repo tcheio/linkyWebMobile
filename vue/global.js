@@ -3,16 +3,18 @@ import { View, StyleSheet, Text } from 'react-native';
 import { XYPlot, XAxis, YAxis, HorizontalGridLines, VerticalBarSeries } from 'react-vis';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
+import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function Global() {
   const { isLoggedIn, userId } = useContext(AuthContext);
   const [data, setData] = useState([]);
+  const { selectedCompteur } = useContext(CompteurContext);
 
   useEffect(() => {
     const fetchData = async () => {
       if (isLoggedIn && userId) {
         try {
-          const response = await axios.get(`http://localhost:3000/conso/latest/${userId}/2024-04-27/2024-05-03`);
+          const response = await axios.get(`http://localhost:3000/conso/latest/${userId}/${selectedCompteur}/2024-04-27/2024-05-03`);
           setData(response.data);
         } catch (error) {
           console.error('Erreur lors de la récupération des données depuis l\'API:', error);
