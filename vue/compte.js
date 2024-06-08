@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, Alert, TextInput, Modal } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
@@ -10,6 +10,11 @@ function CompteScreen({ navigation }) {
   const { selectedCompteur, setSelectedCompteur } = useContext(CompteurContext);
   const [clientInfo, setClientInfo] = useState(null);
   const [compteurs, setCompteurs] = useState([]);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showCompteurModal, setShowCompteurModal] = useState(false);
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [newCompteurNum, setNewCompteurNum] = useState('');
 
   useEffect(() => {
     const fetchClientInfo = async () => {
@@ -60,6 +65,57 @@ function CompteScreen({ navigation }) {
     }
   };
 
+  const handleAddLogin = async () => {
+    try {
+      if(isPrincipal != 1){
+        Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
+        return;
+      }
+      const response = await axios.post('http://localhost:3000/ajoutLogin', {
+        userId,
+        username: newUsername,
+        password: newPassword,
+      });
+
+      if (response.status === 201) {
+        Alert.alert('Login ajouté avec succès');
+        setNewUsername('');
+        setNewPassword('');
+        setShowLoginModal(false);
+      } else {
+        Alert.alert('Erreur', response.data.error);
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du login');
+      console.error('Erreur lors de l\'ajout du login :', error);
+    }
+  };
+
+  const handleAddCompteur = async () => {
+    try {
+
+      if(isPrincipal != 1){
+        Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
+        return;
+      }
+      const response = await axios.post('http://localhost:3000/ajoutCompteur', {
+        numCompteur: newCompteurNum,
+        idClient: userId
+      });
+
+      if (response.status === 201) {
+        Alert.alert('Compteur ajouté avec succès', `ID: ${response.data.compteurId}`);
+        setNewCompteurNum('');
+        setShowCompteurModal(false);
+      } else {
+        Alert.alert('Erreur', response.data.error);
+      }
+    } catch (error) {
+      Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du compteur');
+      console.error('Erreur lors de l\'ajout du compteur :', error);
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <View style={styles.container}>
@@ -92,7 +148,44 @@ function CompteScreen({ navigation }) {
         </Picker>
         <Button title="Déconnexion" onPress={logout} />
         <Button title="Modifier les informations" onPress={handleEdit} />
+        <Button title="Ajouter un login" onPress={() => setShowLoginModal(true)} />
+        <Button title="Ajouter un compteur" onPress={() => setShowCompteurModal(true)} />
       </View>
+
+      <Modal visible={showLoginModal} animationType="slide">
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Ajouter un Login</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nom d'utilisateur"
+            onChangeText={setNewUsername}
+            value={newUsername}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Mot de passe"
+            onChangeText={setNewPassword}
+            value={newPassword}
+            secureTextEntry
+          />
+          <Button title="Ajouter" onPress={handleAddLogin} />
+          <Button title="Annuler" onPress={() => setShowLoginModal(false)} />
+        </View>
+      </Modal>
+
+      <Modal visible={showCompteurModal} animationType="slide">
+        <View style={styles.modalContainer}>
+          <Text style={styles.modalTitle}>Ajouter un Compteur</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Numéro de Compteur"
+            onChangeText={setNewCompteurNum}
+            value={newCompteurNum}
+          />
+          <Button title="Ajouter" onPress={handleAddCompteur} />
+          <Button title="Annuler" onPress={() => setShowCompteurModal(false)} />
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -134,6 +227,26 @@ const styles = StyleSheet.create({
     height: 50,
     width: '100%',
     marginBottom: 20,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 20,
+  },
+  input: {
+    height: 40,
+    width: '100%',
+    marginVertical: 10,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    paddingHorizontal: 10,
+    borderRadius: 5,
   },
 });
 
