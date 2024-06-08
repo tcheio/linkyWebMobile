@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, Button, Alert, TextInput, Modal } from 'react-native';
+import { View, Text, StyleSheet, Button, Alert, TextInput, Modal, TouchableOpacity } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
@@ -67,7 +67,7 @@ function CompteScreen({ navigation }) {
 
   const handleAddLogin = async () => {
     try {
-      if(isPrincipal != 1){
+      if (isPrincipal != 0) {
         Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
         return;
       }
@@ -93,14 +93,12 @@ function CompteScreen({ navigation }) {
 
   const handleAddCompteur = async () => {
     try {
-
-      if(isPrincipal != 1){
+      if (isPrincipal != 0) {
         Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
         return;
       }
       const response = await axios.post('http://localhost:3000/ajoutCompteur', {
         numCompteur: newCompteurNum,
-        idClient: userId
       });
 
       if (response.status === 201) {
@@ -146,10 +144,23 @@ function CompteScreen({ navigation }) {
             <Picker.Item key={compteur.id} label={compteur.numCompteur} value={compteur.id} />
           ))}
         </Picker>
-        <Button title="Déconnexion" onPress={logout} />
-        <Button title="Modifier les informations" onPress={handleEdit} />
-        <Button title="Ajouter un login" onPress={() => setShowLoginModal(true)} />
-        <Button title="Ajouter un compteur" onPress={() => setShowCompteurModal(true)} />
+
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={[styles.button, styles.buttonLogout]} onPress={logout}>
+            <Text style={styles.buttonText}>Déconnexion</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.buttonEdit]} onPress={handleEdit}>
+            <Text style={styles.buttonText}>Modifier les informations</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={[styles.button, styles.buttonPrimary]} onPress={() => setShowLoginModal(true)}>
+            <Text style={styles.buttonText}>Ajouter un login</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => setShowCompteurModal(true)}>
+            <Text style={styles.buttonText}>Ajouter un compteur</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       <Modal visible={showLoginModal} animationType="slide">
@@ -168,8 +179,12 @@ function CompteScreen({ navigation }) {
             value={newPassword}
             secureTextEntry
           />
-          <Button title="Ajouter" onPress={handleAddLogin} />
-          <Button title="Annuler" onPress={() => setShowLoginModal(false)} />
+          <TouchableOpacity style={[styles.button, styles.buttonPrimary]} onPress={handleAddLogin}>
+            <Text style={styles.buttonText}>Ajouter</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => setShowLoginModal(false)}>
+            <Text style={styles.buttonText}>Annuler</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
 
@@ -182,8 +197,12 @@ function CompteScreen({ navigation }) {
             onChangeText={setNewCompteurNum}
             value={newCompteurNum}
           />
-          <Button title="Ajouter" onPress={handleAddCompteur} />
-          <Button title="Annuler" onPress={() => setShowCompteurModal(false)} />
+          <TouchableOpacity style={[styles.button, styles.buttonPrimary]} onPress={handleAddCompteur}>
+            <Text style={styles.buttonText}>Ajouter</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={[styles.button, styles.buttonSecondary]} onPress={() => setShowCompteurModal(false)}>
+            <Text style={styles.buttonText}>Annuler</Text>
+          </TouchableOpacity>
         </View>
       </Modal>
     </View>
@@ -228,23 +247,53 @@ const styles = StyleSheet.create({
     width: '100%',
     marginBottom: 20,
   },
+  buttonRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+    width: '100%',
+  },
+  button: {
+    flex: 1,
+    padding: 15,
+    marginHorizontal: 5,
+    borderRadius: 5,
+    alignItems: 'center',
+  },
+  buttonLogout: {
+    backgroundColor: '#e74c3c',
+  },
+  buttonEdit: {
+    backgroundColor: '#9b59b6',
+  },
+  buttonPrimary: {
+    backgroundColor: '#3498db',
+  },
+  buttonSecondary: {
+    backgroundColor: '#2ecc71',
+  },
+  buttonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
     padding: 20,
+    backgroundColor: '#fff',
   },
   modalTitle: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 'bold',
+    color: '#333',
     marginBottom: 20,
+    textAlign: 'center',
   },
   input: {
     height: 40,
-    width: '100%',
-    marginVertical: 10,
-    borderWidth: 1,
     borderColor: '#ccc',
+    borderWidth: 1,
+    marginBottom: 20,
     paddingHorizontal: 10,
     borderRadius: 5,
   },
