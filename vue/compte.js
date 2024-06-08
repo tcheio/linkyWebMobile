@@ -1,16 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
+import { View, Text, StyleSheet, Button, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 import { CompteurContext } from '../Controlleur/CompteurContext';
 
-function CompteScreen() {
-  const { isLoggedIn, username, login, userId, logout } = useContext(AuthContext);
+function CompteScreen({ navigation }) {
+  const { isLoggedIn, username, userId, logout } = useContext(AuthContext);
   const { selectedCompteur, setSelectedCompteur } = useContext(CompteurContext);
   const [clientInfo, setClientInfo] = useState(null);
-  const [localUsername, setLocalUsername] = useState('');
-  const [localPassword, setLocalPassword] = useState('');
   const [compteurs, setCompteurs] = useState([]);
 
   useEffect(() => {
@@ -47,6 +45,20 @@ function CompteScreen() {
     }
   }, [isLoggedIn, username]);
 
+  const handleEdit = async () => {
+    try {
+      const response = await axios.get(`http://localhost:3000/client/${userId}`);
+      if (response.data && response.data.isComptePrincipal === 1) {
+        navigation.navigate('Modifier ses Informations');
+      } else {
+        Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification du compte principal :', error);
+      Alert.alert('Erreur', 'Impossible de vérifier le statut du compte.');
+    }
+  };
+
   if (!isLoggedIn) {
     return (
       <View style={styles.container}>
@@ -78,6 +90,7 @@ function CompteScreen() {
           ))}
         </Picker>
         <Button title="Déconnexion" onPress={logout} />
+        <Button title="Modifier les informations" onPress={handleEdit} />
       </View>
     </View>
   );
@@ -88,23 +101,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     padding: 20,
-  },
-  loginContainer: {
-    alignItems: 'center',
-  },
-  title: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 20,
-  },
-  input: {
-    height: 40,
-    width: '100%',
-    marginVertical: 10,
-    borderWidth: 1,
-    borderColor: '#ccc',
-    paddingHorizontal: 10,
-    borderRadius: 5,
   },
   welcomeText: {
     fontSize: 24,
