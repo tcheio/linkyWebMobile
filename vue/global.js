@@ -1,15 +1,33 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, StyleSheet, Text, ActivityIndicator } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator, Dimensions } from 'react-native';
 import { XYPlot, XAxis, YAxis, HorizontalGridLines, VerticalBarSeries } from 'react-vis';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 import { CompteurContext } from '../Controlleur/CompteurContext';
+
+function useWindowDimensions() {
+  const [windowDimensions, setWindowDimensions] = useState(Dimensions.get('window'));
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowDimensions(Dimensions.get('window'));
+    };
+
+    Dimensions.addEventListener('change', handleResize);
+    return () => Dimensions.removeEventListener('change', handleResize);
+  }, []);
+
+  return windowDimensions;
+}
 
 function Global() {
   const { isLoggedIn, userId } = useContext(AuthContext);
   const [data, setData] = useState([]);
   const { selectedCompteur } = useContext(CompteurContext);
   const [loading, setLoading] = useState(false);
+  const { width: screenWidth, height: screenHeight } = useWindowDimensions();
+  const graphWidth = screenWidth * 0.9;
+  const graphHeight = screenHeight * 0.6;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,7 +61,7 @@ function Global() {
   const tickValues = formattedData.map(item => item.x);
   const tickFormat = timestamp => {
     const date = new Date(timestamp);
-    const options = { day: '2-digit', month: '2-digit', year: '2-digit' };
+    const options = { day: '2-digit', month: '2-digit'};
     return new Intl.DateTimeFormat('fr-FR', options).format(date);
   };
 
@@ -59,7 +77,7 @@ function Global() {
     <View style={styles.container}>
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
       <View style={styles.graphContainer}>
-        <XYPlot height={500} width={500} margin={{ left: 60, right: 10, top: 10, bottom: 50 }}>
+        <XYPlot height={graphHeight} width={graphWidth} margin={{ left: 60, right: 10, top: 10, bottom: 50 }}>
           <HorizontalGridLines />
           <VerticalBarSeries data={formattedData} barWidth={0.4} />
           <XAxis 
@@ -84,18 +102,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+    padding: 10,
   },
   graphContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    width: '100%',
     alignItems: 'center',
   },
   infoContainer: {
-    marginLeft: 20,
+    width: '90%',
+    marginTop: 20,
     padding: 10,
     backgroundColor: '#EFEFEF',
     borderRadius: 5,
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
   infoText: {
     fontSize: 16,
