@@ -1,5 +1,4 @@
 import React, { createContext, useState } from 'react';
-import { CompteurContext } from './CompteurContext';
 
 export const AuthContext = createContext();
 
@@ -7,23 +6,24 @@ export const AuthProvider = ({ children }) => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [userId, setUserId] = useState(null);
   const [username, setUsername] = useState('');
-  //const { setSelectedCompteur } = useContext(CompteurContext);
+  const [isPrincipal, setIsPrincipal] = useState(false);
 
-  const login = (id, username) => {
+  const login = (id, username, isComptePrincipal) => {
     setIsLoggedIn(true);
     setUserId(id);
     setUsername(username);
-    
+    setIsPrincipal(isComptePrincipal);
   };
 
   const logout = () => {
     setIsLoggedIn(false);
     setUserId(null);
     setUsername('');
+    setIsPrincipal(false);
   };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, userId, username, login, logout }}>
+    <AuthContext.Provider value={{ isLoggedIn, userId, username, isPrincipal, login, logout }}>
       {children}
     </AuthContext.Provider>
   );

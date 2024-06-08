@@ -5,7 +5,7 @@ import { AuthContext } from '../Controlleur/AuthContext';
 import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function Home() {
-  const { isLoggedIn, userId, login, logout } = useContext(AuthContext);
+  const { isLoggedIn, userId, login, logout, isPrincipal } = useContext(AuthContext);
   const { selectedCompteur, setSelectedCompteur, numCompteur, setNumCompteur } = useContext(CompteurContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -73,7 +73,8 @@ function Home() {
       });
 
       if (response.status === 200) {
-        login(response.data.id, username);
+        console.log(response.data.isComptePrincipal);
+        login(response.data.id, username, response.data.isComptePrincipal);
         Alert.alert('Connexion réussie');
       } else {
         Alert.alert('Erreur', response.data.error);

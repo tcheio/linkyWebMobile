@@ -6,7 +6,7 @@ import { AuthContext } from '../Controlleur/AuthContext';
 import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function CompteScreen({ navigation }) {
-  const { isLoggedIn, username, userId, logout } = useContext(AuthContext);
+  const { isLoggedIn, username, userId, logout, isPrincipal } = useContext(AuthContext);
   const { selectedCompteur, setSelectedCompteur } = useContext(CompteurContext);
   const [clientInfo, setClientInfo] = useState(null);
   const [compteurs, setCompteurs] = useState([]);
@@ -48,7 +48,8 @@ function CompteScreen({ navigation }) {
   const handleEdit = async () => {
     try {
       const response = await axios.get(`http://localhost:3000/client/${userId}`);
-      if (response.data && response.data.isComptePrincipal === 1) {
+      console.log(isPrincipal);
+      if (response.data && isPrincipal === 1) {
         navigation.navigate('Modifier ses Informations');
       } else {
         Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
