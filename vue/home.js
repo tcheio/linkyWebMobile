@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, Button, Alert, Dimensions, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Alert, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 import { CompteurContext } from '../Controlleur/CompteurContext';
 
 function Home() {
-  const { isLoggedIn, userId, login, logout } = useContext(AuthContext);
+  const { isLoggedIn, userId, login, logout, isPrincipal } = useContext(AuthContext);
   const { selectedCompteur, setSelectedCompteur, numCompteur, setNumCompteur } = useContext(CompteurContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
@@ -73,7 +73,8 @@ function Home() {
       });
 
       if (response.status === 200) {
-        login(response.data.id, username);
+        console.log(response.data.isComptePrincipal);
+        login(response.data.id, username, response.data.isComptePrincipal);
         Alert.alert('Connexion réussie');
       } else {
         Alert.alert('Erreur', response.data.error);
@@ -165,8 +166,12 @@ function Home() {
                 value={password}
                 secureTextEntry
               />
-              <Button title="S'inscrire" onPress={handleSignUp} />
-              <Button title="Déjà inscrit ? Se connecter" onPress={() => setShowSignUp(false)} />
+              <TouchableOpacity style={[styles.button, styles.buttonRed]} onPress={handleSignUp}>
+                <Text style={styles.buttonText}>S'inscrire</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.button, styles.buttonGreen]} onPress={() => setShowSignUp(false)}>
+                <Text style={styles.buttonText}>Déjà inscrit ? Se connecter</Text>
+              </TouchableOpacity>
             </View>
           ) : (
             <View style={styles.form}>
@@ -184,8 +189,12 @@ function Home() {
                 value={password}
                 secureTextEntry
               />
-              <Button title="Se connecter" onPress={handleSubmit} />
-              <Button title="S'inscrire" onPress={() => setShowSignUp(true)} />
+              <TouchableOpacity style={[styles.button, styles.buttonBlue]} onPress={handleSubmit}>
+                <Text style={styles.buttonText}>Se connecter</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={[styles.button, styles.buttonRed]} onPress={() => setShowSignUp(true)}>
+                <Text style={styles.buttonText}>S'inscrire</Text>
+              </TouchableOpacity>
             </View>
           )}
         </View>
@@ -316,6 +325,26 @@ const styles = StyleSheet.create({
   compteurText: {
     fontSize: 16,
     color: '#333',
+  },
+  button: {
+    width: '100%',
+    padding: 15,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  buttonBlue: {
+    backgroundColor: 'blue',
+  },
+  buttonRed: {
+    backgroundColor: 'red',
+  },
+  buttonGreen: {
+    backgroundColor: 'green',
+  },
+  buttonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 
