@@ -15,6 +15,7 @@ function CompteScreen({ navigation }) {
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [newCompteurNum, setNewCompteurNum] = useState('');
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     const fetchClientInfo = async () => {
@@ -50,6 +51,13 @@ function CompteScreen({ navigation }) {
     }
   }, [isLoggedIn, username]);
 
+  const showNotification = (message) => {
+    setNotification(message);
+    setTimeout(() => {
+      setNotification(null);
+    }, 3000); // Affiche la notification pendant 3 secondes
+  };
+
   const handleEdit = async () => {
     try {
       const response = await axios.get(`http://localhost:3000/client/${userId}`);
@@ -57,7 +65,7 @@ function CompteScreen({ navigation }) {
       if (response.data && isPrincipal === 1) {
         navigation.navigate('Modifier ses Informations');
       } else {
-        Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
+        showNotification('Ce compte n\'est pas le login principal');
       }
     } catch (error) {
       console.error('Erreur lors de la vérification du compte principal :', error);
@@ -67,8 +75,8 @@ function CompteScreen({ navigation }) {
 
   const handleAddLogin = async () => {
     try {
-      if (isPrincipal != 0) {
-        Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
+      if (isPrincipal != 1) {
+        showNotification('Ce compte n\'est pas le login principal');
         return;
       }
       const response = await axios.post('http://localhost:3000/ajoutLogin', {
@@ -93,8 +101,8 @@ function CompteScreen({ navigation }) {
 
   const handleAddCompteur = async () => {
     try {
-      if (isPrincipal != 0) {
-        Alert.alert('Erreur', 'Vous n\'êtes pas le compte principal.');
+      if (isPrincipal != 1) {
+        showNotification('Ce compte n\'est pas le login principal');
         return;
       }
       const response = await axios.post('http://localhost:3000/ajoutCompteur', {
@@ -124,6 +132,11 @@ function CompteScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
+      {notification && (
+        <View style={styles.notification}>
+          <Text style={styles.notificationText}>{notification}</Text>
+        </View>
+      )}
       <View style={styles.infoContainer}>
         <Text style={styles.welcomeText}>Bienvenue {username}</Text>
         {clientInfo && (
@@ -260,17 +273,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     alignItems: 'center',
   },
-  buttonLogout: {
-    backgroundColor: '#e74c3c',
-  },
-  buttonEdit: {
-    backgroundColor: '#9b59b6',
-  },
   buttonPrimary: {
     backgroundColor: '#3498db',
   },
   buttonSecondary: {
     backgroundColor: '#2ecc71',
+  },
+  buttonEdit: {
+    backgroundColor: '#9b59b6',
+  },
+  buttonLogout: {
+    backgroundColor: '#e74c3c',
   },
   buttonText: {
     color: '#fff',
@@ -297,6 +310,23 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     borderRadius: 5,
   },
+  notification: {
+    position: 'absolute',
+    top: 0,
+    width: '100%',
+    padding: 20,
+    backgroundColor: 'red',
+    zIndex: 1000,
+  },
+  notificationText: {
+    color: 'white',
+    textAlign: 'center',
+    fontWeight: 'bold',
+  },
+  text: {
+    textAlign: 'center',
+    fontSize: 18,
+  }
 });
 
 export default CompteScreen;
