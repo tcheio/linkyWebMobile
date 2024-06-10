@@ -15,6 +15,7 @@ function Home() {
   const [tel, setTel] = useState('');
   const [latestConso, setLatestConso] = useState(null);
   const [difference, setDifference] = useState(null);
+  const [average, setAverage] = useState(null); // Nouvelle variable d'état pour la moyenne
   const [isSmallScreen, setIsSmallScreen] = useState(Dimensions.get('window').width < 400);
 
   useEffect(() => {
@@ -112,6 +113,11 @@ function Home() {
       const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${userId}/${compteurId}`);
       setDifference(responseDifference.data.difference);
       console.log('Difference:', responseDifference.data.difference);
+
+      console.log('Fetching average...');
+      const responseAverage = await axios.get(`http://localhost:3000/average/${userId}/${compteurId}`);
+      setAverage(parseInt(responseAverage.data.average));
+      console.log('Average:', responseAverage.data.average);
     } catch (error) {
       console.error('Erreur lors de la récupération des données :', error);
     }
@@ -120,12 +126,9 @@ function Home() {
   useEffect(() => {
     if (isLoggedIn && userId && !selectedCompteur) {
       fetchCompteurAndData(userId); // Fetch compteur and other data when the user logs in and selectedCompteur is not set
-    }
-
-    else if (selectedCompteur){
+    } else if (selectedCompteur){
       fetchData(userId, selectedCompteur);
     }
-    
   }, [isLoggedIn, userId, selectedCompteur]);
 
   return (
@@ -214,7 +217,7 @@ function Home() {
             </View>
 
             <View style={[styles.box, styles.boxGrey]}>
-              <Text style={styles.boxText}>Moyenne: N/A</Text>
+              <Text style={styles.boxText}>Moyenne: {average !== null ? `${average} kW` : 'N/A'}</Text>
             </View>
           </View>
 
