@@ -35,7 +35,7 @@ function Global() {
         setLoading(true);
         try {
           const response = await axios.get(`http://localhost:3000/conso/latest/${userId}/${selectedCompteur}`);
-          setData(response.data.reverse());  // Reversing to ensure chronological order
+          setData(response.data.reverse());
         } catch (error) {
           console.error('Erreur lors de la récupération des données depuis l\'API:', error);
         }
@@ -47,7 +47,7 @@ function Global() {
   }, [isLoggedIn, userId, selectedCompteur]);
 
   const formattedData = data.map(item => ({
-    x: new Date(item.date).getTime(),  // Use timestamp for x values
+    x: new Date(item.date).getTime(),
     y: item.kw
   }));
 
@@ -57,7 +57,7 @@ function Global() {
   const maxConsumption = Math.max(...consumptionValues);
   const avgConsumption = consumptionValues.reduce((sum, value) => sum + value, 0) / consumptionValues.length;
 
-  // Format dates for X-axis ticks
+
   const tickValues = formattedData.map(item => item.x);
   const tickFormat = timestamp => {
     const date = new Date(timestamp);
@@ -84,7 +84,6 @@ function Global() {
             tickValues={tickValues} 
             tickFormat={tickFormat}
           />
-          <YAxis/>
         </XYPlot>
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>Consommation Moyenne: {avgConsumption.toFixed(2)} kW</Text>
