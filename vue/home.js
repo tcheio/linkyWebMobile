@@ -9,14 +9,16 @@ function Home() {
   const { selectedCompteur, setSelectedCompteur, numCompteur, setNumCompteur } = useContext(CompteurContext);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showSignUp, setShowSignUp] = useState(false);
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [tel, setTel] = useState('');
   const [latestConso, setLatestConso] = useState(null);
   const [difference, setDifference] = useState(null);
-  const [average, setAverage] = useState(null); // Nouvelle variable d'état pour la moyenne
+  const [average, setAverage] = useState(null);
   const [isSmallScreen, setIsSmallScreen] = useState(Dimensions.get('window').width < 400);
+  const [errorMessage, setErrorMessage] = useState(''); // État pour le message d'erreur
 
   useEffect(() => {
     const handleResize = () => {
@@ -29,7 +31,39 @@ function Home() {
     };
   }, []);
 
+  const validatePassword = (password, confirmPassword) => {
+    const passwordErrors = [];
+    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#]).{12,}$/;
+
+    if (password.length < 12) {
+      passwordErrors.push('Le mot de passe doit comporter au moins 12 caractères.');
+    }
+    if (!/[a-z]/.test(password)) {
+      passwordErrors.push('Le mot de passe doit contenir au moins une lettre minuscule.');
+    }
+    if (!/[A-Z]/.test(password)) {
+      passwordErrors.push('Le mot de passe doit contenir au moins une lettre majuscule.');
+    }
+    if (!/\d/.test(password)) {
+      passwordErrors.push('Le mot de passe doit contenir au moins un chiffre.');
+    }
+    if (!/[@$!%*?&#]/.test(password)) {
+      passwordErrors.push('Le mot de passe doit contenir au moins un caractère spécial.');
+    }
+    if (password !== confirmPassword) {
+      passwordErrors.push('Les mots de passe ne correspondent pas.');
+    }
+
+    return passwordErrors;
+  };
+
   const handleSignUp = async () => {
+    const errors = validatePassword(password, confirmPassword);
+    if (errors.length > 0) {
+      setErrorMessage(errors.join('\n'));
+      return;
+    }
+
     try {
       const response = await axios.post('http://localhost:3000/inscription', {
         nom: name,
@@ -90,7 +124,7 @@ function Home() {
     try {
       const responseCompteur = await axios.get(`http://localhost:3000/user/compteur/${userId}`);
       if (responseCompteur.data) {
-        console.log('Compteurs:', responseCompteur.data[0]); // Log les compteurs récupérés
+        console.log('Compteurs:', responseCompteur.data[0]);
         setSelectedCompteur(responseCompteur.data[0].id);
         setNumCompteur(responseCompteur.data[0].numCompteur);
         fetchData(userId, responseCompteur.data[0].id);
@@ -125,7 +159,7 @@ function Home() {
 
   useEffect(() => {
     if (isLoggedIn && userId && !selectedCompteur) {
-      fetchCompteurAndData(userId); // Fetch compteur and other data when the user logs in and selectedCompteur is not set
+      fetchCompteurAndData(userId);
     } else if (selectedCompteur){
       fetchData(userId, selectedCompteur);
     }
@@ -169,6 +203,16 @@ function Home() {
                 value={password}
                 secureTextEntry
               />
+              <TextInput
+                style={styles.input}
+                placeholder="Confirmer le mot de passe"
+                onChangeText={text => setConfirmPassword(text)}
+                value={confirmPassword}
+                secureTextEntry
+              />
+              {errorMessage ? (
+                <Text style={styles.errorText}>{errorMessage}</Text>
+              ) : null}
               <TouchableOpacity style={[styles.button, styles.buttonRed]} onPress={handleSignUp}>
                 <Text style={styles.buttonText}>S'inscrire</Text>
               </TouchableOpacity>
@@ -178,7 +222,7 @@ function Home() {
             </View>
           ) : (
             <View style={styles.form}>
-              <Text style={styles.title}>Veuillez vous connecter</Text>
+              <Text style={styles.title}>Se connecter</Text>
               <TextInput
                 style={styles.input}
                 placeholder="Nom d'utilisateur"
@@ -195,7 +239,7 @@ function Home() {
               <TouchableOpacity style={[styles.button, styles.buttonBlue]} onPress={handleSubmit}>
                 <Text style={styles.buttonText}>Se connecter</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.button, styles.buttonRed]} onPress={() => setShowSignUp(true)}>
+              <TouchableOpacity style={[styles.button, styles.buttonGreen]} onPress={() => setShowSignUp(true)}>
                 <Text style={styles.buttonText}>S'inscrire</Text>
               </TouchableOpacity>
             </View>
@@ -209,15 +253,18 @@ function Home() {
 
             <View style={[styles.row, isSmallScreen ? styles.column : null]}>
               <View style={[styles.box, styles.boxBlue]}>
-                <Text style={styles.boxText}>Dernière consommation: {latestConso ? `${latestConso.kw} kW` : 'N/A'}</Text>
+                <Text style={styles.boxText}>Dernière consommation: {latestConso ? 
+                `${latestConso.kw} kW` : 'N/A'}</Text>
               </View>
               <View style={[styles.box, styles.boxRed]}>
-                <Text style={styles.boxText}>Différence: {difference !== null ? `${difference} kW` : 'N/A'}</Text>
+                <Text style={styles.boxText}>Différence: {difference !== null ? 
+                `${difference} kW` : 'N/A'}</Text>
               </View>
             </View>
 
             <View style={[styles.box, styles.boxGrey]}>
-              <Text style={styles.boxText}>Moyenne: {average !== null ? `${average} kW` : 'N/A'}</Text>
+              <Text style={styles.boxText}>Moyenne: {average !== null ? 
+              `${average} kW` : 'N/A'}</Text>
             </View>
           </View>
 
@@ -348,6 +395,11 @@ const styles = StyleSheet.create({
   buttonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  errorText: {
+    color: 'red',
+    textAlign: 'center',
+    marginBottom: 10,
   },
 });
 
