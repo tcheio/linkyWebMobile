@@ -84,6 +84,7 @@ function Global() {
             tickValues={tickValues} 
             tickFormat={tickFormat}
           />
+          <YAxis />
         </XYPlot>
         <View style={styles.infoContainer}>
           <Text style={styles.infoText}>Consommation Moyenne: {avgConsumption.toFixed(2)} kW</Text>

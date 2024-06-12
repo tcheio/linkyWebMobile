@@ -77,8 +77,10 @@ function CompteScreen({ navigation }) {
     try {
       if (isPrincipal != 1) {
         showNotification('Ce compte n\'est pas le login principal');
-        return;
+        return null;
       }
+
+      else{
       const response = await axios.post('http://localhost:3000/ajoutLogin', {
         userId,
         username: newUsername,
@@ -93,7 +95,8 @@ function CompteScreen({ navigation }) {
       } else {
         Alert.alert('Erreur', response.data.error);
       }
-    } catch (error) {
+    }
+  } catch (error) {
       Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du login');
       console.error('Erreur lors de l\'ajout du login :', error);
     }
@@ -105,6 +108,8 @@ function CompteScreen({ navigation }) {
         showNotification('Ce compte n\'est pas le login principal');
         return;
       }
+
+      else {
       const response = await axios.post('http://localhost:3000/ajoutCompteur', {
         numCompteur: newCompteurNum,
       });
@@ -116,6 +121,7 @@ function CompteScreen({ navigation }) {
       } else {
         Alert.alert('Erreur', response.data.error);
       }
+    }
     } catch (error) {
       Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du compteur');
       console.error('Erreur lors de l\'ajout du compteur :', error);

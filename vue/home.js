@@ -1,10 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, StyleSheet, TextInput, Alert, Dimensions, ScrollView, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Alert, Dimensions, ScrollView, TouchableOpacity, CheckBox } from 'react-native';
 import axios from 'axios';
 import { AuthContext } from '../Controlleur/AuthContext';
 import { CompteurContext } from '../Controlleur/CompteurContext';
 
-function Home() {
+
+function Home({ navigation }) {
   const { isLoggedIn, userId, login, logout, isPrincipal } = useContext(AuthContext);
   const { selectedCompteur, setSelectedCompteur, numCompteur, setNumCompteur } = useContext(CompteurContext);
   const [username, setUsername] = useState('');
@@ -19,6 +20,7 @@ function Home() {
   const [average, setAverage] = useState(null);
   const [isSmallScreen, setIsSmallScreen] = useState(Dimensions.get('window').width < 400);
   const [errorMessage, setErrorMessage] = useState(''); // État pour le message d'erreur
+  const [acceptTerms, setAcceptTerms] = useState(false); // État pour la case à cocher
 
   useEffect(() => {
     const handleResize = () => {
@@ -61,6 +63,11 @@ function Home() {
     const errors = validatePassword(password, confirmPassword);
     if (errors.length > 0) {
       setErrorMessage(errors.join('\n'));
+      return;
+    }
+
+    if (!acceptTerms) {
+      setErrorMessage('Vous devez accepter les termes de confidentialité pour vous inscrire.');
       return;
     }
 
@@ -210,14 +217,22 @@ function Home() {
                 value={confirmPassword}
                 secureTextEntry
               />
-              {errorMessage ? (
-                <Text style={styles.errorText}>{errorMessage}</Text>
-              ) : null}
-              <TouchableOpacity style={[styles.button, styles.buttonRed]} onPress={handleSignUp}>
+              <View style={styles.checkboxContainer}>
+                <CheckBox
+                  value={acceptTerms}
+                  onValueChange={setAcceptTerms}
+                  style={styles.checkbox}
+                />
+                <Text style={styles.checkboxLabel} onPress={() => navigation.navigate(PrivacyPolicy)}>
+                  J'accepte les <Text style={styles.link}>termes de confidentialité</Text>
+                </Text>
+              </View>
+              {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
+              <TouchableOpacity style={[styles.button, styles.buttonGreen]} onPress={handleSignUp}>
                 <Text style={styles.buttonText}>S'inscrire</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.button, styles.buttonGreen]} onPress={() => setShowSignUp(false)}>
-                <Text style={styles.buttonText}>Déjà inscrit ? Se connecter</Text>
+              <TouchableOpacity style={[styles.button, styles.buttonBlue]} onPress={() => setShowSignUp(false)}>
+                <Text style={styles.buttonText}>Retour</Text>
               </TouchableOpacity>
             </View>
           ) : (
@@ -400,6 +415,21 @@ const styles = StyleSheet.create({
     color: 'red',
     textAlign: 'center',
     marginBottom: 10,
+  },
+  checkboxContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 10,
+  },
+  checkbox: {
+    marginRight: 10,
+  },
+  checkboxLabel: {
+    fontSize: 16,
+  },
+  link: {
+    color: 'blue',
+    textDecorationLine: 'underline',
   },
 });
 
