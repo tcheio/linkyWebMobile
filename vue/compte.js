@@ -77,8 +77,10 @@ function CompteScreen({ navigation }) {
     try {
       if (isPrincipal != 1) {
         showNotification('Ce compte n\'est pas le login principal');
-        return;
+        return null;
       }
+
+      else{
       const response = await axios.post('http://localhost:3000/ajoutLogin', {
         userId,
         username: newUsername,
@@ -93,7 +95,8 @@ function CompteScreen({ navigation }) {
       } else {
         Alert.alert('Erreur', response.data.error);
       }
-    } catch (error) {
+    }
+  } catch (error) {
       Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du login');
       console.error('Erreur lors de l\'ajout du login :', error);
     }
@@ -105,6 +108,8 @@ function CompteScreen({ navigation }) {
         showNotification('Ce compte n\'est pas le login principal');
         return;
       }
+
+      else {
       const response = await axios.post('http://localhost:3000/ajoutCompteur', {
         numCompteur: newCompteurNum,
       });
@@ -116,12 +121,45 @@ function CompteScreen({ navigation }) {
       } else {
         Alert.alert('Erreur', response.data.error);
       }
+    }
     } catch (error) {
       Alert.alert('Erreur', 'Une erreur est survenue lors de l\'ajout du compteur');
       console.error('Erreur lors de l\'ajout du compteur :', error);
     }
   };
 
+  const handleDeleteAccount = async () => {
+    try {
+      console.log('Tentative de suppression du compte');
+      if (isPrincipal !== 1) {
+        console.log('Compte non principal, suppression refusée');
+        Alert.alert('Erreur', 'Ce compte n\'est pas le compte principal');
+        return;
+      }
+  
+      console.log('Compte principal, suppression en cours');
+      try {
+        const response = await axios.delete(`http://localhost:3000/deleteclient/${userId}`);
+        if (response.status === 200) {
+          console.log('Compte supprimé avec succès');
+          logout();
+        } else {
+          console.log('Erreur lors de la suppression du compte', response.data);
+          Alert.alert('Erreur', 'Une erreur est survenue lors de la suppression du compte');
+        }
+      } catch (error) {
+        console.error('Erreur lors de la suppression du compte :', error);
+        Alert.alert('Erreur', 'Une erreur est survenue lors de la suppression du compte');
+      }
+  
+    } catch (error) {
+      console.error('Erreur lors de la suppression du compte :', error);
+      Alert.alert('Erreur', 'Une erreur est survenue lors de la suppression du compte');
+    }
+  };
+  
+  
+  
   if (!isLoggedIn) {
     return (
       <View style={styles.container}>
@@ -174,6 +212,9 @@ function CompteScreen({ navigation }) {
             <Text style={styles.buttonText}>Ajouter un compteur</Text>
           </TouchableOpacity>
         </View>
+        <TouchableOpacity style={[styles.button, styles.buttonDelete]} onPress={handleDeleteAccount}>
+          <Text style={styles.buttonText}>Supprimer le compte</Text>
+        </TouchableOpacity>
       </View>
 
       <Modal visible={showLoginModal} animationType="slide">
@@ -285,6 +326,9 @@ const styles = StyleSheet.create({
   buttonLogout: {
     backgroundColor: '#e74c3c',
   },
+  buttonDelete: {
+    backgroundColor: '#e67e22',
+  },  
   buttonText: {
     color: '#fff',
     fontWeight: 'bold',
