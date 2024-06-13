@@ -72,7 +72,7 @@ function Home({ navigation }) {
     }
 
     try {
-      const response = await axios.post('http://localhost:3000/inscription', {
+      const response = await axios.post('http://192.168.1.21:3000/inscription', {
         nom: name,
         email: email,
         tel: tel,
@@ -94,7 +94,7 @@ function Home({ navigation }) {
 
   const handleLogout = async () => {
     try {
-      const response = await axios.post('http://localhost:3000/deconnexion');
+      const response = await axios.post('http://192.168.1.21:3000/deconnexion');
       if (response.status === 200) {
         logout();
         Alert.alert('Déconnexion réussie');
@@ -109,7 +109,7 @@ function Home({ navigation }) {
 
   const handleSubmit = async () => {  
     try {
-      const response = await axios.post('http://localhost:3000/connexion', {
+      const response = await axios.post('http://192.168.1.21:3000/connexion', {
         username: username,
         password: password,
       });
@@ -129,7 +129,7 @@ function Home({ navigation }) {
 
   const fetchCompteurAndData = async (userId) => {
     try {
-      const responseCompteur = await axios.get(`http://localhost:3000/user/compteur/${userId}`);
+      const responseCompteur = await axios.get(`http://192.168.1.21:3000/user/compteur/${userId}`);
       if (responseCompteur.data) {
         console.log('Compteurs:', responseCompteur.data[0]);
         setSelectedCompteur(responseCompteur.data[0].id);
@@ -146,17 +146,17 @@ function Home({ navigation }) {
   const fetchData = async (userId, compteurId) => {
     try {
       console.log('Fetching latest consumption...');
-      const responseLatest = await axios.get(`http://localhost:3000/conso/last/${userId}/${compteurId}`);
+      const responseLatest = await axios.get(`http://192.168.1.21:3000/conso/last/${userId}/${compteurId}`);
       setLatestConso(responseLatest.data[0]);
       console.log('Latest Consumption:', responseLatest.data[0]);
 
       console.log('Fetching difference...');
-      const responseDifference = await axios.get(`http://localhost:3000/conso/difference/${userId}/${compteurId}`);
+      const responseDifference = await axios.get(`http://192.168.1.21:3000/conso/difference/${userId}/${compteurId}`);
       setDifference(responseDifference.data.difference);
       console.log('Difference:', responseDifference.data.difference);
 
       console.log('Fetching average...');
-      const responseAverage = await axios.get(`http://localhost:3000/average/${userId}/${compteurId}`);
+      const responseAverage = await axios.get(`http://192.168.1.21:3000/average/${userId}/${compteurId}`);
       setAverage(parseInt(responseAverage.data.average));
       console.log('Average:', responseAverage.data.average);
     } catch (error) {

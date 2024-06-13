@@ -34,7 +34,7 @@ function Global() {
       if (isLoggedIn && userId && selectedCompteur) {
         setLoading(true);
         try {
-          const response = await axios.get(`http://localhost:3000/conso/latest/${userId}/${selectedCompteur}`);
+          const response = await axios.get(`http://192.168.1.21:3000/conso/latest/${userId}/${selectedCompteur}`);
           setData(response.data.reverse());
         } catch (error) {
           console.error('Erreur lors de la récupération des données depuis l\'API:', error);

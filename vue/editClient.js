@@ -15,7 +15,7 @@ function EditClient({ navigation }) {
   useEffect(() => {
     const fetchClientData = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/client/${userId}`);
+        const response = await axios.get(`http://192.168.1.21:3000/client/${userId}`);
         setClientData(response.data);
       } catch (error) {
         console.error('Erreur lors de la récupération des informations du client :', error);
@@ -32,7 +32,7 @@ function EditClient({ navigation }) {
 
   const handleSubmit = async () => {
     try {
-      await axios.put(`http://localhost:3000/client/${userId}`, clientData);
+      await axios.put(`hhttp://192.168.1.21:3000/client/${userId}`, clientData);
       Alert.alert('Succès', 'Informations du client mises à jour avec succès');
       navigation.goBack(); // Retourner à la page précédente après la mise à jour
     } catch (error) {

@@ -20,7 +20,7 @@ function CompteScreen({ navigation }) {
   useEffect(() => {
     const fetchClientInfo = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/info/all/${userId}`);
+        const response = await axios.get(`http://192.168.1.21:3000/info/all/${userId}`);
         if (response.data && response.data.id) {
           setClientInfo(response.data);
         } else {
@@ -33,7 +33,7 @@ function CompteScreen({ navigation }) {
 
     const fetchCompteurs = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/user/compteurs/${userId}`);
+        const response = await axios.get(`http://192.168.1.21:3000/user/compteurs/${userId}`);
         if (response.data) {
           console.log('Compteurs:', response.data);  // Log les compteurs récupérés
           setCompteurs(Array.isArray(response.data) ? response.data : []);
@@ -60,7 +60,7 @@ function CompteScreen({ navigation }) {
 
   const handleEdit = async () => {
     try {
-      const response = await axios.get(`http://localhost:3000/client/${userId}`);
+      const response = await axios.get(`http://192.168.1.21:3000/client/${userId}`);
       console.log(isPrincipal);
       if (response.data && isPrincipal === 1) {
         navigation.navigate('Modifier ses Informations');
@@ -81,7 +81,7 @@ function CompteScreen({ navigation }) {
       }
 
       else{
-      const response = await axios.post('http://localhost:3000/ajoutLogin', {
+      const response = await axios.post('http://192.168.1.21:3000/ajoutLogin', {
         userId,
         username: newUsername,
         password: newPassword,
@@ -110,7 +110,7 @@ function CompteScreen({ navigation }) {
       }
 
       else {
-      const response = await axios.post('http://localhost:3000/ajoutCompteur', {
+      const response = await axios.post('http://192.168.1.21:3000/ajoutCompteur', {
         numCompteur: newCompteurNum,
       });
 
@@ -139,7 +139,7 @@ function CompteScreen({ navigation }) {
   
       console.log('Compte principal, suppression en cours');
       try {
-        const response = await axios.delete(`http://localhost:3000/deleteclient/${userId}`);
+        const response = await axios.delete(`http://192.168.1.21:3000/deleteclient/${userId}`);
         if (response.status === 200) {
           console.log('Compte supprimé avec succès');
           logout();
